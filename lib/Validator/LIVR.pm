@@ -1,53 +1,97 @@
 package Validator::LIVR;
 
-use 5.006;
+use v5.10;
 use strict;
 use warnings FATAL => 'all';
+
+use Validator::LIVR::Rules::Common;
+use Validator::LIVR::Rules::String;
+
+use Data::Dumper;
 
 our $VERSION = '0.01';
 
 our %DEFAULT_RULES = (
     'required'       => \&Validator::LIVR::Rules::Common::required,
     'not_empty'      => \&Validator::LIVR::Rules::Common::not_empty,
-    'oneof'          => \&Validator::LIVR::Rules::String::oneof,
+    'one_of'         => \&Validator::LIVR::Rules::String::one_of,
     'length_equal'   => \&Validator::LIVR::Rules::String::length_equal,
     'length_between' => \&Validator::LIVR::Rules::String::length_between,
 );
 
 sub new {
-    my ($class, $rules) = @_;
-    
+    my ($class, $livr_rules) = @_;
+
     my $self = bless {
         is_prepared    => 0,
-        rules          => $rules,
+        livr_rules     => $livr_rules,
         validators     => {},
-        rules_builders => {},
+        validator_builders => {},
     }, $class;
 
     $self->register_rules(%DEFAULT_RULES);
-    
+
     return $self;
 }
 
 sub prepare {
     my $self = shift;
-
     $self->{is_prepared} = 1;
+
+    my $all_rules = $self->{livr_rules};
+
+    while ( my ($field, $field_rules) = each %$all_rules ) {
+        $field_rules = [$field_rules] if ref($field_rules) ne 'ARRAY';
+
+        my @validators;
+        foreach my $rule (@$field_rules) {
+            my ($name, $args) = $self->_parse_rule($rule);
+            push @validators, $self->_build_validator($name, $args);
+        }
+        $self->{validators}{$field} = \@validators;
+    }
+}
+
+sub _parse_rule {
+    my ($self, $livr_rule) = @_;
+
+    my ($name, $args);
+
+    if ( ref($livr_rule) eq 'HASH' ) {
+        ($name) = keys %$livr_rule;
+
+        $args = $livr_rule->{$name};
+        $args = [$args] unless ref($args) eq 'ARRAY';
+    } else {
+        $name = $livr_rule;
+        $args = [];
+    }
+
+    return ($name, $args);
+}
+
+sub _build_validator {
+    my ($self, $name, $args) = @_;
+    die unless $self->{validator_builders}->{$name};
+    return $self->{validator_builders}->{$name}->(@$args);
 }
 
 sub validate {
-    my ($self, $data) = shift;
+    my ($self, $data) = @_;
     $self->prepare() unless $self->{is_prepared};
 
     my %errors;
     my %result;
 
     foreach my $key ( keys %$data ) {
-        my $validators = $self->{validators}[$key];
-        my $value      = $data->{$key};
+        my $validators = $self->{validators}{$key};
+        next unless $validators && @$validators;
+
+        my $value = $data->{$key};
 
         my $is_ok = 1;
         foreach my $v_cb (@$validators) {
+
             my $err_code = $v_cb->($value, $data, $key, $self);
 
             if ( $err_code ) {
@@ -69,10 +113,11 @@ sub validate {
 
 sub register_rules {
     my $self  = shift;
-    $self->{rules_builders} = { %{$self->{rules_builders}}, @_  };
+    $self->{validator_builders} = { %{$self->{validator_builders}}, @_  };
 
     return $self;
 }
+
 
 
 =head1 NAME
