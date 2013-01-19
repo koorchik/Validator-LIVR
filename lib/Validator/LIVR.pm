@@ -44,10 +44,11 @@ sub new {
     my ($class, $livr_rules) = @_;
 
     my $self = bless {
-        is_prepared    => 0,
-        livr_rules     => $livr_rules,
-        validators     => {},
+        is_prepared        => 0,
+        livr_rules         => $livr_rules,
+        validators         => {},
         validator_builders => {},
+        errors             => undef,
     }, $class;
 
     $self->register_rules(%DEFAULT_RULES);
@@ -77,31 +78,29 @@ sub validate {
     my ($self, $data) = @_;
     $self->prepare() unless $self->{is_prepared};
 
-    my %errors;
-    my %result;
+    my ( %errors, %result );
 
-    foreach my $key ( keys %{ $self->{validators} } ) {
-        my $validators = $self->{validators}{$key};
+    foreach my $field_name ( keys %{ $self->{validators} } ) {
+        my $validators = $self->{validators}{$field_name};
         next unless $validators && @$validators;
 
-        my $value = $data->{$key};
+        my $value = $data->{$field_name};
 
         my $is_ok = 1;
         foreach my $v_cb (@$validators) {
-
-            my $err_code = $v_cb->($value, $data, $key, $self);
+            my $err_code = $v_cb->($value, $data, $field_name, $self);
 
             if ( $err_code ) {
-                $errors{$key} = $err_code;
+                $errors{$field_name} = $err_code;
                 $is_ok = 0;
                 last;
             }
         }
 
-        $result{$key} = $value if $is_ok && exists $data->{$key};
+        $result{$field_name} = $value if $is_ok && exists $data->{$field_name};
     }
 
-    if (keys %errors) {
+    if ( keys %errors ) {
         $self->{errors} = \%errors;
         return;
     } else {
@@ -143,6 +142,7 @@ sub _parse_rule {
 sub _build_validator {
     my ($self, $name, $args) = @_;
     die unless $self->{validator_builders}->{$name};
+
     return $self->{validator_builders}->{$name}->(@$args);
 }
 
