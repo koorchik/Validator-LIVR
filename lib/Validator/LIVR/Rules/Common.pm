@@ -1,5 +1,8 @@
 package Validator::LIVR::Rules::Common;
-use v5.10;
+
+use strict;
+use warnings;
+
 sub required {
     return sub {
         defined $_[0] && $_[0] ne '' ? undef : 'REQUIRED';

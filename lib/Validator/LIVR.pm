@@ -24,7 +24,7 @@ our %DEFAULT_RULES = (
     'like'             => \&Validator::LIVR::Rules::String::like,
 
     'integer'          => \&Validator::LIVR::Rules::Numeric::integer,
-    'positive_integer' => \&Validator::LIVR::Rules::Numeric::positve_integer,
+    'positive_integer' => \&Validator::LIVR::Rules::Numeric::positive_integer,
     'decimal'          => \&Validator::LIVR::Rules::Numeric::decimal,
     'positive_decimal' => \&Validator::LIVR::Rules::Numeric::positive_decimal,
     'max_number'       => \&Validator::LIVR::Rules::Numeric::max_number,

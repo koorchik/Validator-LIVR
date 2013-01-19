@@ -1,5 +1,8 @@
 package Validator::LIVR::Rules::String;
 
+use strict;
+use warnings;
+
 sub one_of {
     my $allowed_values = shift;
 
@@ -62,6 +65,19 @@ sub length_between {
 
         return 'TOO_SHORT' if length($value) < $min_length;
         return 'TOO_LONG' if length($value) > $max_length;
+        return;
+    };
+}
+
+
+sub like {
+    my $re = shift;
+
+    return sub {
+        my $value = shift;
+        return if !defined($value) || $value eq '';
+        
+        return 'WRONG_FORMAT' unless $value =~ m/$re/;
         return;
     };
 }
