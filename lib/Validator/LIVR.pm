@@ -6,17 +6,38 @@ use warnings FATAL => 'all';
 
 use Validator::LIVR::Rules::Common;
 use Validator::LIVR::Rules::String;
-
-use Data::Dumper;
+use Validator::LIVR::Rules::Numeric;
+use Validator::LIVR::Rules::Special;
+use Validator::LIVR::Rules::Helpers;
 
 our $VERSION = '0.01';
 
 our %DEFAULT_RULES = (
-    'required'       => \&Validator::LIVR::Rules::Common::required,
-    'not_empty'      => \&Validator::LIVR::Rules::Common::not_empty,
-    'one_of'         => \&Validator::LIVR::Rules::String::one_of,
-    'length_equal'   => \&Validator::LIVR::Rules::String::length_equal,
-    'length_between' => \&Validator::LIVR::Rules::String::length_between,
+    'required'         => \&Validator::LIVR::Rules::Common::required,
+    'not_empty'        => \&Validator::LIVR::Rules::Common::not_empty,
+
+    'one_of'           => \&Validator::LIVR::Rules::String::one_of,
+    'min_length'       => \&Validator::LIVR::Rules::String::min_length,
+    'max_length'       => \&Validator::LIVR::Rules::String::max_length,
+    'length_equal'     => \&Validator::LIVR::Rules::String::length_equal,
+    'length_between'   => \&Validator::LIVR::Rules::String::length_between,
+    'like'             => \&Validator::LIVR::Rules::String::like,
+
+    'integer'          => \&Validator::LIVR::Rules::Numeric::integer,
+    'positive_integer' => \&Validator::LIVR::Rules::Numeric::positve_integer,
+    'decimal'          => \&Validator::LIVR::Rules::Numeric::decimal,
+    'positive_decimal' => \&Validator::LIVR::Rules::Numeric::positive_decimal,
+    'max_number'       => \&Validator::LIVR::Rules::Numeric::max_number,
+    'min_number'       => \&Validator::LIVR::Rules::Numeric::min_number,
+    'number_between'   => \&Validator::LIVR::Rules::Numeric::number_between,
+
+    'email'            => \&Validator::LIVR::Rules::Special::email,
+    'equal_to_field'   => \&Validator::LIVR::Rules::Special::equal_to_field,
+
+    'list_of'          => \&Validator::LIVR::Rules::Helpers::list_of,
+    'nested_object'    => \&Validator::LIVR::Rules::Helpers::nested_object,
+    'list_of_objects'  => \&Validator::LIVR::Rules::Helpers::list_of_objects,
+    'list_of_different_objects' => \&Validator::LIVR::Rules::Helpers::list_of_different_objects,
 );
 
 sub new {
@@ -52,6 +73,55 @@ sub prepare {
     }
 }
 
+sub validate {
+    my ($self, $data) = @_;
+    $self->prepare() unless $self->{is_prepared};
+
+    my %errors;
+    my %result;
+
+    foreach my $key ( keys %{ $self->{validators} } ) {
+        my $validators = $self->{validators}{$key};
+        next unless $validators && @$validators;
+
+        my $value = $data->{$key};
+
+        my $is_ok = 1;
+        foreach my $v_cb (@$validators) {
+
+            my $err_code = $v_cb->($value, $data, $key, $self);
+
+            if ( $err_code ) {
+                $errors{$key} = $err_code;
+                $is_ok = 0;
+                last;
+            }
+        }
+
+        $result{$key} = $value if $is_ok && exists $data->{$key};
+    }
+
+    if (keys %errors) {
+        $self->{errors} = \%errors;
+        return;
+    } else {
+        $self->{errors} = undef;
+        return \%result;
+    }
+}
+
+sub get_errors {
+    my $self = shift;
+    return $self->{errors};
+}
+
+sub register_rules {
+    my $self  = shift;
+    $self->{validator_builders} = { %{$self->{validator_builders}}, @_  };
+
+    return $self;
+}
+
 sub _parse_rule {
     my ($self, $livr_rule) = @_;
 
@@ -74,48 +144,6 @@ sub _build_validator {
     my ($self, $name, $args) = @_;
     die unless $self->{validator_builders}->{$name};
     return $self->{validator_builders}->{$name}->(@$args);
-}
-
-sub validate {
-    my ($self, $data) = @_;
-    $self->prepare() unless $self->{is_prepared};
-
-    my %errors;
-    my %result;
-
-    foreach my $key ( keys %$data ) {
-        my $validators = $self->{validators}{$key};
-        next unless $validators && @$validators;
-
-        my $value = $data->{$key};
-
-        my $is_ok = 1;
-        foreach my $v_cb (@$validators) {
-
-            my $err_code = $v_cb->($value, $data, $key, $self);
-
-            if ( $err_code ) {
-                $errors{$key} = $err_code;
-                $is_ok = 0;
-                last;
-            }
-        }
-
-        $result{$key} = $value if $is_ok;
-    }
-
-    return {
-        success => ( keys %errors ? 0 : 1 ),
-        errors  => \%errors,
-        data    => \%result,
-    };
-}
-
-sub register_rules {
-    my $self  = shift;
-    $self->{validator_builders} = { %{$self->{validator_builders}}, @_  };
-
-    return $self;
 }
 
 
