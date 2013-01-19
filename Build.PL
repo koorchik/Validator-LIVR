@@ -14,10 +14,10 @@ my $builder = Module::Build->new(
     },
     build_requires => {
         'Test::More' => 0,
+        'JSON'       => 0,
     },
     requires => {
-        #'ABC'              => 1.6,
-        #'Foo::Bar::Module' => 5.0401,
+        'Email::Valid' => 0,
     },
     add_to_cleanup     => [ 'Validator-LIVR-*' ],
     create_makefile_pl => 'traditional',
