@@ -26,7 +26,6 @@ sub equal_to_field {
         return 'FIELDS_NOT_EQUAL' unless $value eq $params->{$field};
         return;
     };
-
 }
 
 1;

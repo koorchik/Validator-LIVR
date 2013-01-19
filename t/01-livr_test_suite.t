@@ -9,7 +9,6 @@ use FindBin qw/$Bin/;
 use JSON;
 use Term::ANSIColor;
 use File::Find;
-use Data::Dumper;
 use Validator::LIVR;
 
 iterate_test_data('test_suite/positive' => sub {
@@ -21,6 +20,7 @@ iterate_test_data('test_suite/positive' => sub {
     ok(! $validator->get_errors(), 'Validator should contain no errors' ) or diag explain $validator->get_errors();
     is_deeply( $output, $data->{output}, 'Validator should return validated data' );
 });
+
 
 iterate_test_data('test_suite/negative' => sub {
     my $data = shift;

@@ -34,8 +34,8 @@ our %DEFAULT_RULES = (
     'email'            => \&Validator::LIVR::Rules::Special::email,
     'equal_to_field'   => \&Validator::LIVR::Rules::Special::equal_to_field,
 
-    'list_of'          => \&Validator::LIVR::Rules::Helpers::list_of,
     'nested_object'    => \&Validator::LIVR::Rules::Helpers::nested_object,
+    'list_of'          => \&Validator::LIVR::Rules::Helpers::list_of,
     'list_of_objects'  => \&Validator::LIVR::Rules::Helpers::list_of_objects,
     'list_of_different_objects' => \&Validator::LIVR::Rules::Helpers::list_of_different_objects,
 );
@@ -78,6 +78,11 @@ sub validate {
     my ($self, $data) = @_;
     $self->prepare() unless $self->{is_prepared};
 
+    if ( ref($data) ne 'HASH' ) {
+        $self->{errors} = 'FORMAT_ERROR';
+        return;
+    }
+
     my ( %errors, %result );
 
     foreach my $field_name ( keys %{ $self->{validators} } ) {
@@ -87,8 +92,11 @@ sub validate {
         my $value = $data->{$field_name};
 
         my $is_ok = 1;
+        my $field_result;
+
         foreach my $v_cb (@$validators) {
-            my $err_code = $v_cb->($value, $data, $field_name, $self);
+            undef($field_result);
+            my $err_code = $v_cb->($value, $data, \$field_result);
 
             if ( $err_code ) {
                 $errors{$field_name} = $err_code;
@@ -97,7 +105,9 @@ sub validate {
             }
         }
 
-        $result{$field_name} = $value if $is_ok && exists $data->{$field_name};
+        if ( $is_ok && exists $data->{$field_name} ) {
+            $result{$field_name} = $field_result // $value;
+        }
     }
 
     if ( keys %errors ) {
@@ -141,7 +151,7 @@ sub _parse_rule {
 
 sub _build_validator {
     my ($self, $name, $args) = @_;
-    die unless $self->{validator_builders}->{$name};
+    die "Rule [$name] not registered\n" unless $self->{validator_builders}->{$name};
 
     return $self->{validator_builders}->{$name}->(@$args);
 }
