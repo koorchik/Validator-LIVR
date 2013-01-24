@@ -1,9 +1,11 @@
 Build.PL
 Changes
 lib/Validator/LIVR.pm
-MANIFEST			This list of files
-README
-t/00-load.t
-t/manifest.t
-t/pod-coverage.t
-t/pod.t
+lib/Validator/LIVR/Rules/Common.pm
+lib/Validator/LIVR/Rules/String.pm
+lib/Validator/LIVR/Rules/Numeric.pm
+lib/Validator/LIVR/Rules/Special.pm
+lib/Validator/LIVR/Rules/Helpers.pm
+MANIFEST			
+README.pod
+t/01-livr_test_suite.t
