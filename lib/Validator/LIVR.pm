@@ -51,9 +51,14 @@ sub new {
         errors             => undef,
     }, $class;
 
-    $self->register_rules(%DEFAULT_RULES);
+    $self->{validator_builders} = { %DEFAULT_RULES };
 
     return $self;
+}
+
+sub register_rules {
+    my $class = shift;
+    %DEFAULT_RULES = { %DEFAULT_RULES, @_  };
 }
 
 sub prepare {
@@ -122,13 +127,6 @@ sub validate {
 sub get_errors {
     my $self = shift;
     return $self->{errors};
-}
-
-sub register_rules {
-    my $self  = shift;
-    $self->{validator_builders} = { %{$self->{validator_builders}}, @_  };
-
-    return $self;
 }
 
 sub _parse_rule {

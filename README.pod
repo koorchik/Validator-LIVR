@@ -1,5 +1,3 @@
-
-
 =head1 NAME
 
 Validator::LIVR - Lightweight validator supporting Language Independent Validation Rules Specification (LIVR)
