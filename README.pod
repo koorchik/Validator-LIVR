@@ -30,7 +30,9 @@ Validator::LIVR - Lightweight validator supporting Language Independent Validati
     $validator->register_rules( 'strong_password' =>  sub {
         return sub {
             my $value = shift;
-            return if !defined($value) || $value eq ''; # We already have "required" rule to check that the value is present
+
+            # We already have "required" rule to check that the value is present
+            return if !defined($value) || $value eq ''; 
 
             return 'WEAK_PASSWORD' if length($value) < 6;
             return;
@@ -39,7 +41,8 @@ Validator::LIVR - Lightweight validator supporting Language Independent Validati
 
 
 
-    # If you want to stop on the first error you can overwrite all rules with your own which use exceptions
+    # If you want to stop on the first error 
+    # you can overwrite all rules with your own which use exceptions
     my $default_rules = Validator::LIVR->ger_default_rules();
      
     while ( my ($rule_name, $rule_builder) = each %$default_rules ) {
