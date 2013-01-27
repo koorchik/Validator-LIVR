@@ -5,10 +5,9 @@ use warnings;
 
 
 sub nested_object {
-    my $livr = shift;
+    my ($livr, $rule_builders) = @_;
     
-    my $validator = Validator::LIVR->new($livr);
-    $validator->prepare();
+    my $validator = Validator::LIVR->new($livr)->register_rules(%$rule_builders)->prepare();
 
     return sub {
         my ( $nested_object, $params, $output_ref ) = @_;
@@ -29,11 +28,10 @@ sub nested_object {
 
 
 sub list_of {
-    my $rules = shift;
+    my ( $rules, $rule_builders ) = @_;
     my $livr =  { field => $rules };
 
-    my $validator = Validator::LIVR->new($livr);
-    $validator->prepare();
+    my $validator = Validator::LIVR->new($livr)->register_rules(%$rule_builders)->prepare();
 
     return sub {
         my ( $values, $params, $output_ref ) = @_;
@@ -64,10 +62,9 @@ sub list_of {
 
 
 sub list_of_objects {
-    my $livr = shift;
+    my ($livr, $rule_builders) = @_;
 
-    my $validator = Validator::LIVR->new($livr);
-    $validator->prepare();
+    my $validator = Validator::LIVR->new($livr)->register_rules(%$rule_builders)->prepare();
 
     return sub {
         my ( $objects, $params, $output_ref ) = @_;
@@ -97,12 +94,11 @@ sub list_of_objects {
 }
 
 sub list_of_different_objects {
-    my ( $selector_field, $livrs ) = @_;
+    my ( $selector_field, $livrs, $rule_builders ) = @_;
 
     my %validators;
     foreach my $selector_value ( keys %$livrs ) {
-        my $validator = Validator::LIVR->new( $livrs->{$selector_value} );
-        $validator->prepare();    
+        my $validator = Validator::LIVR->new( $livrs->{$selector_value} )->register_rules(%$rule_builders)->prepare();
 
         $validators{$selector_value} = $validator;
     }

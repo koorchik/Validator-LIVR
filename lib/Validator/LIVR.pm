@@ -4,6 +4,8 @@ use v5.10;
 use strict;
 use warnings FATAL => 'all';
 
+use Carp qw/croak/;
+
 use Validator::LIVR::Rules::Common;
 use Validator::LIVR::Rules::String;
 use Validator::LIVR::Rules::Numeric;
@@ -51,19 +53,30 @@ sub new {
         errors             => undef,
     }, $class;
 
-    $self->{validator_builders} = { %DEFAULT_RULES };
+    $self->register_rules(%DEFAULT_RULES);
 
     return $self;
 }
 
-sub register_rules {
-    my $class = shift;
-    %DEFAULT_RULES = { %DEFAULT_RULES, @_  };
+sub register_default_rules {
+    my ( $class, %rules ) = @_;
+
+    foreach my $rule_name ( keys %rules ) {
+        my $rule_builder = $rules{$rule_name};
+        croak "RULE_BUILDER [$rule_name] SHOULD BE A CODEREF" unless ref($rule_builder) eq 'CODE';
+
+        $DEFAULT_RULES{$rule_name} = $rule_builder;
+    }
+    
+    return $class;
+}
+
+sub get_default_rules {
+    return {%DEFAULT_RULES};
 }
 
 sub prepare {
     my $self = shift;
-    $self->{is_prepared} = 1;
 
     my $all_rules = $self->{livr_rules};
 
@@ -77,6 +90,10 @@ sub prepare {
         }
         $self->{validators}{$field} = \@validators;
     }
+
+    $self->{is_prepared} = 1;
+
+    return $self;
 }
 
 sub validate {
@@ -129,6 +146,25 @@ sub get_errors {
     return $self->{errors};
 }
 
+sub register_rules {
+    my ( $self, %rules ) = @_;
+
+    foreach my $rule_name ( keys %rules ) {
+        my $rule_builder = $rules{$rule_name};
+        croak "RULE_BUILDER [$rule_name] SHOULD BE A CODEREF" unless ref($rule_builder) eq 'CODE';
+
+        $self->{validator_builders}{$rule_name} = $rule_builder;
+    }
+    
+    return $self;
+}
+
+sub get_rules {
+    my $self = shift;
+
+    return { %{$self->{validator_builders}} };
+}
+
 sub _parse_rule {
     my ($self, $livr_rule) = @_;
 
@@ -151,10 +187,10 @@ sub _build_validator {
     my ($self, $name, $args) = @_;
     die "Rule [$name] not registered\n" unless $self->{validator_builders}->{$name};
 
-    return $self->{validator_builders}->{$name}->(@$args);
+    return $self->{validator_builders}->{$name}->( @$args, $self->get_rules() );
 }
 
-
+1; # End of Validator::LIVR
 
 =head1 NAME
 
@@ -162,8 +198,7 @@ Validator::LIVR - Lightweight validator supporting Language Independent Validati
 
 =head1 SYNOPSIS
 
-    use Validator::LIVR;
-
+    # Common usage
     my $validator = Validator::LIVR->new({
         name      => 'required',
         email     => [ 'required', 'email' ],
@@ -179,6 +214,39 @@ Validator::LIVR - Lightweight validator supporting Language Independent Validati
         my $errors = $validator->get_errors();
         ...
      }
+
+
+    # Feel free to register your own rules
+    my $validator = Validator::LIVR->new({
+        password => ['required', 'strong_password']
+    });
+
+    $validator->register_rules( 'strong_password' =>  sub {
+        return sub {
+            my $value = shift;
+            return if !defined($value) || $value eq ''; # We already have "required" rule to check that the value is present
+
+            return 'WEAK_PASSWORD' if length($value) < 6;
+            return;
+        }
+    } );
+
+
+
+    # If you want to stop on the first error you can overwrite all rules with your own which use exceptions
+    my $default_rules = Validator::LIVR->ger_default_rules();
+     
+    while ( my ($rule_name, $rule_builder) = each %$default_rules ) {
+        Validator::LIVR->register_default_rules($rule_name => sub {
+            my $rule_validator = $rule_builder->(@_);
+            
+            return sub {
+                my $error = $rule_validator->(@_);
+                die $error if $error;
+                return;
+            }
+        });
+    }
 
 =head1 DESCRIPTION
 
@@ -218,13 +286,17 @@ Contructor creates validator objects.
 
 $LIVR - validations rules. Rules description is available here - L<https://github.com/koorchik/LIVR>
 
-=head2 Validator::LIVR->register_rules( RULE_NAME => \&RULE_BUILDER)
+=head2 Validator::LIVR->register_default_rules( RULE_NAME => \&RULE_BUILDER, ... )
 
 &RULE_BUILDER - is a subtorutine reference which will be called for building single rule validator.
 
 
-    Validator::LIVR->register_rules( my_rule => sub {
-        my ($arg1, $arg2, $arg3) =  @_;
+    Validator::LIVR->register_default_rules( my_rule => sub {
+        my ($arg1, $arg2, $arg3, $rule_builders) =  @_;
+        
+        # $rule_builders - are rules from original validator 
+        # to allow you create new validator with all supported rules
+        # my $validator = Validator::LIVR->new($livr)->register_rules(%$rule_builders)->prepare();
 
         return sub {
             my ( $value, $all_values, $output_ref ) = @_;
@@ -265,7 +337,7 @@ Here is "max_number" implemenation:
         };
     }
 
-    Validator::LIVR->register_rules( max_number => \&max_number );
+    Validator::LIVR->register_default_rules( max_number => \&max_number );
 
 All rules for the validator are equal. It does not distinguish "required" and "list_of_different_objects" rule.
 So, you can extend validator with any rules you like.
@@ -287,6 +359,12 @@ Just look at the existing rules implementation:
 =back
 
 All rules description is available here - L<https://github.com/koorchik/LIVR>
+
+
+=head2 Validator::LIVR->get_default_rules( )
+
+returns hashref containing all default rule_builders for the validator. 
+You can register new rule or update existing one with "register_rules" method.
 
 =head1 OBJECT METHODS
 
@@ -317,10 +395,19 @@ For example:
     {
         "country"  => "NOT_ALLOWED_VALUE",
         "zip"      => "NOT_POSITIVE_INTEGER",
-        "street":  => "REQUIRED",
+        "street"   => "REQUIRED",
         "building" => "NOT_POSITIVE_INTEGER"
     },    
 
+=head2 $VALIDATOR->register_rules( RULE_NAME => \&RULE_BUILDER, ... )
+
+&RULE_BUILDER - is a subtorutine reference which will be called for building single rule validator.
+
+See "Validator::LIVR->register_default_rules" for rules examples.
+
+=head2 $VALIDATOR->get_rules( )
+
+returns hashref containing all rule_builders for the validator. You can register new rule or update existing one with "register_rules" method.
 
 =head1 AUTHOR
 
@@ -407,4 +494,4 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =cut
 
-1; # End of Validator::LIVR
+
