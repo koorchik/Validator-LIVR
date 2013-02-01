@@ -14,7 +14,7 @@ use Validator::LIVR::Rules::Helpers;
 
 our $VERSION = '0.01';
 
-our %DEFAULT_RULES = (
+my %DEFAULT_RULES = (
     'required'         => \&Validator::LIVR::Rules::Common::required,
     'not_empty'        => \&Validator::LIVR::Rules::Common::not_empty,
 
@@ -42,8 +42,10 @@ our %DEFAULT_RULES = (
     'list_of_different_objects' => \&Validator::LIVR::Rules::Helpers::list_of_different_objects,
 );
 
+my $DEFAULT_AUTO_TRIM = 0;
+
 sub new {
-    my ($class, $livr_rules) = @_;
+    my ($class, $livr_rules, $is_auto_trim) = @_;
 
     my $self = bless {
         is_prepared        => 0,
@@ -51,6 +53,7 @@ sub new {
         validators         => {},
         validator_builders => {},
         errors             => undef,
+        is_auto_trim       => ( $is_auto_trim // $DEFAULT_AUTO_TRIM )
     }, $class;
 
     $self->register_rules(%DEFAULT_RULES);
@@ -73,6 +76,11 @@ sub register_default_rules {
 
 sub get_default_rules {
     return {%DEFAULT_RULES};
+}
+
+sub default_auto_trim {
+    my ($class, $is_auto_trim) = @_;
+    $DEFAULT_AUTO_TRIM = !!$is_auto_trim;
 }
 
 sub prepare {
@@ -104,6 +112,8 @@ sub validate {
         $self->{errors} = 'FORMAT_ERROR';
         return;
     }
+
+    $data = $self->_auto_trim($data) if $self->{is_auto_trim};
 
     my ( %errors, %result );
 
@@ -190,6 +200,37 @@ sub _build_validator {
     return $self->{validator_builders}->{$name}->( @$args, $self->get_rules() );
 }
 
+sub _auto_trim {
+    my ( $self, $data ) = @_;
+    my $ref_type = ref($data);
+
+    if ( !$ref_type && $data ) {
+        $data =~ s/^\s+//;
+        $data =~ s/\s+$//;
+        return $data;
+    } 
+    elsif ( $ref_type eq 'HASH' ) {
+        my $trimmed_data = {};
+        
+        foreach my $key ( keys %$data ) {
+            $trimmed_data->{$key} = $self->_auto_trim( $data->{$key} );
+        }
+
+        return $trimmed_data;
+    } 
+    elsif ( $ref_type eq 'ARRAY' ) {
+        my $trimmed_data = []; 
+
+        for ( my $i = 0; $i < @$data; $i++ ) {
+            $trimmed_data->[$i] = $self->_auto_trim( $data->[$i] )
+        }
+
+        return $trimmed_data;
+    } 
+    
+    return $data;
+}
+
 1; # End of Validator::LIVR
 
 =head1 NAME
@@ -199,6 +240,8 @@ Validator::LIVR - Lightweight validator supporting Language Independent Validati
 =head1 SYNOPSIS
 
     # Common usage
+    Validator::LIVR->default_auto_trim(1);
+
     my $validator = Validator::LIVR->new({
         name      => 'required',
         email     => [ 'required', 'email' ],
@@ -206,14 +249,14 @@ Validator::LIVR - Lightweight validator supporting Language Independent Validati
         phone     => { max_length => 10 },
         password  => [ 'required', {min_length => 10} ],
         password2 => { equal_to_field => 'password' }
-     });
+    });
 
-     if ( my $valid_data = $validator->validate($user_data) ) {
-        save_user($valid_data);
-     } else {
-        my $errors = $validator->get_errors();
-        ...
-     }
+    if ( my $valid_data = $validator->validate($user_data) ) {
+       save_user($valid_data);
+    } else {
+       my $errors = $validator->get_errors();
+       ...
+    }
 
 
     # Feel free to register your own rules
@@ -253,7 +296,7 @@ Validator::LIVR - Lightweight validator supporting Language Independent Validati
 
 =head1 DESCRIPTION
 
-L<Validator::LIVR> is a L<Mojolicious> plugin that adds "render_file" helper. It does not read file in memory and just streaming it to a client.
+L<Validator::LIVR> lightweight validator supporting Language Independent Validation Rules Specification (LIVR)
 
 See L<https://github.com/koorchik/LIVR> for details.
 
@@ -283,11 +326,14 @@ Features:
 
 =head1 CLASS METHODS
 
-=head2 Validator::LIVR->new( $LIVR )
+=head2 Validator::LIVR->new( $LIVR [, $IS_AUTO_TRIM] )
 
 Contructor creates validator objects.
 
 $LIVR - validations rules. Rules description is available here - L<https://github.com/koorchik/LIVR>
+
+$IS_AUTO_TRIM - asks validator to trim all values before validation. Output will be also trimmed.
+if $IS_AUTO_TRIM is undef than default_auto_trim value will be used.
 
 =head2 Validator::LIVR->register_default_rules( RULE_NAME => \&RULE_BUILDER, ... )
 
@@ -368,6 +414,10 @@ All rules description is available here - L<https://github.com/koorchik/LIVR>
 
 returns hashref containing all default rule_builders for the validator. 
 You can register new rule or update existing one with "register_rules" method.
+
+=head2 Validator::LIVR->default_auto_trim($IS_AUTO_TRIM)
+
+Enables or disables automatic trim for input data. If is on then every new validator instance will have auto trim option enabled
 
 =head1 OBJECT METHODS
 

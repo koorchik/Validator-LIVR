@@ -1,3 +1,4 @@
+
 =head1 NAME
 
 Validator::LIVR - Lightweight validator supporting Language Independent Validation Rules Specification (LIVR)
@@ -5,6 +6,8 @@ Validator::LIVR - Lightweight validator supporting Language Independent Validati
 =head1 SYNOPSIS
 
     # Common usage
+    Validator::LIVR->default_auto_trim(1);
+
     my $validator = Validator::LIVR->new({
         name      => 'required',
         email     => [ 'required', 'email' ],
@@ -12,14 +15,14 @@ Validator::LIVR - Lightweight validator supporting Language Independent Validati
         phone     => { max_length => 10 },
         password  => [ 'required', {min_length => 10} ],
         password2 => { equal_to_field => 'password' }
-     });
+    });
 
-     if ( my $valid_data = $validator->validate($user_data) ) {
-        save_user($valid_data);
-     } else {
-        my $errors = $validator->get_errors();
-        ...
-     }
+    if ( my $valid_data = $validator->validate($user_data) ) {
+       save_user($valid_data);
+    } else {
+       my $errors = $validator->get_errors();
+       ...
+    }
 
 
     # Feel free to register your own rules
@@ -59,7 +62,7 @@ Validator::LIVR - Lightweight validator supporting Language Independent Validati
 
 =head1 DESCRIPTION
 
-L<Validator::LIVR> is a L<Mojolicious> plugin that adds "render_file" helper. It does not read file in memory and just streaming it to a client.
+L<Validator::LIVR> lightweight validator supporting Language Independent Validation Rules Specification (LIVR)
 
 See L<https://github.com/koorchik/LIVR> for details.
 
@@ -89,11 +92,14 @@ Features:
 
 =head1 CLASS METHODS
 
-=head2 Validator::LIVR->new( $LIVR )
+=head2 Validator::LIVR->new( $LIVR [, $IS_AUTO_TRIM] )
 
 Contructor creates validator objects.
 
 $LIVR - validations rules. Rules description is available here - L<https://github.com/koorchik/LIVR>
+
+$IS_AUTO_TRIM - asks validator to trim all values before validation. Output will be also trimmed.
+if $IS_AUTO_TRIM is undef than default_auto_trim value will be used.
 
 =head2 Validator::LIVR->register_default_rules( RULE_NAME => \&RULE_BUILDER, ... )
 
@@ -174,6 +180,10 @@ All rules description is available here - L<https://github.com/koorchik/LIVR>
 
 returns hashref containing all default rule_builders for the validator. 
 You can register new rule or update existing one with "register_rules" method.
+
+=head2 Validator::LIVR->default_auto_trim($IS_AUTO_TRIM)
+
+Enables or disables automatic trim for input data. If is on then every new validator instance will have auto trim option enabled
 
 =head1 OBJECT METHODS
 
