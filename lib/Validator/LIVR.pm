@@ -42,7 +42,7 @@ my %DEFAULT_RULES = (
     'list_of_different_objects' => \&Validator::LIVR::Rules::Helpers::list_of_different_objects,
 );
 
-my $DEFAULT_AUTO_TRIM = 0;
+my $IS_DEFAULT_AUTO_TRIM = 0;
 
 sub new {
     my ($class, $livr_rules, $is_auto_trim) = @_;
@@ -53,7 +53,7 @@ sub new {
         validators         => {},
         validator_builders => {},
         errors             => undef,
-        is_auto_trim       => ( $is_auto_trim // $DEFAULT_AUTO_TRIM )
+        is_auto_trim       => ( $is_auto_trim // $IS_DEFAULT_AUTO_TRIM )
     }, $class;
 
     $self->register_rules(%DEFAULT_RULES);
@@ -80,7 +80,7 @@ sub get_default_rules {
 
 sub default_auto_trim {
     my ($class, $is_auto_trim) = @_;
-    $DEFAULT_AUTO_TRIM = !!$is_auto_trim;
+    $IS_DEFAULT_AUTO_TRIM = !!$is_auto_trim;
 }
 
 sub prepare {
