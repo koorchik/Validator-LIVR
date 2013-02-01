@@ -6,7 +6,6 @@ use lib '../lib';
 use Test::More;
 use Test::Exception;
 
-use FindBin qw/$Bin/;
 use Validator::LIVR;
 
 Validator::LIVR->register_default_rules(
