@@ -1,0 +1,41 @@
+---
+abstract: 'Lightweight validator supporting Language Independent Validation Rules Specification (LIVR)'
+author:
+  - 'Viktor Turskyi <koorchik@cpan.org>'
+build_requires:
+  JSON: 0
+  Test::Exception: 0
+  Test::More: 0
+configure_requires:
+  Module::Build: 0
+dynamic_config: 1
+generated_by: 'Module::Build version 0.4003, CPAN::Meta::Converter version 2.120921'
+license: artistic_2
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: Validator-LIVR
+provides:
+  Validator::LIVR:
+    file: lib/Validator/LIVR.pm
+    version: 0.01
+  Validator::LIVR::Rules::Common:
+    file: lib/Validator/LIVR/Rules/Common.pm
+    version: 0
+  Validator::LIVR::Rules::Helpers:
+    file: lib/Validator/LIVR/Rules/Helpers.pm
+    version: 0
+  Validator::LIVR::Rules::Numeric:
+    file: lib/Validator/LIVR/Rules/Numeric.pm
+    version: 0
+  Validator::LIVR::Rules::Special:
+    file: lib/Validator/LIVR/Rules/Special.pm
+    version: 0
+  Validator::LIVR::Rules::String:
+    file: lib/Validator/LIVR/Rules/String.pm
+    version: 0
+requires:
+  Email::Valid: 0
+resources:
+  license: http://www.perlfoundation.org/artistic_license_2_0
+version: 0.01
