@@ -137,6 +137,3 @@ t/test_suite/positive/03-one_of/output.json
 t/test_suite/positive/15-number_between/input.json
 t/test_suite/positive/15-number_between/rules.json
 t/test_suite/positive/15-number_between/output.json
-Makefile.PL
-META.yml
-META.json
