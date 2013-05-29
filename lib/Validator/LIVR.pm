@@ -43,9 +43,10 @@ my %DEFAULT_RULES = (
 );
 
 my $IS_DEFAULT_AUTO_TRIM = 0;
+my $IS_DEFAULT_CLEAR_UNDEF = 1;
 
 sub new {
-    my ($class, $livr_rules, $is_auto_trim) = @_;
+    my ($class, $livr_rules, $is_auto_trim, $is_clear_undef) = @_;
 
     my $self = bless {
         is_prepared        => 0,
@@ -53,7 +54,8 @@ sub new {
         validators         => {},
         validator_builders => {},
         errors             => undef,
-        is_auto_trim       => ( $is_auto_trim // $IS_DEFAULT_AUTO_TRIM )
+        is_auto_trim       => ( $is_auto_trim   // $IS_DEFAULT_AUTO_TRIM ),
+        is_clear_undef     => ( $is_clear_undef // $IS_DEFAULT_CLEAR_UNDEF )
     }, $class;
 
     $self->register_rules(%DEFAULT_RULES);
@@ -81,6 +83,11 @@ sub get_default_rules {
 sub default_auto_trim {
     my ($class, $is_auto_trim) = @_;
     $IS_DEFAULT_AUTO_TRIM = !!$is_auto_trim;
+}
+
+sub default_clear_undef {
+    my ($class, $is_clear_undef) = @_;
+    $IS_DEFAULT_CLEAR_UNDEF = !!$is_clear_undef;
 }
 
 sub prepare {
@@ -113,7 +120,7 @@ sub validate {
         return;
     }
 
-    $data = $self->_auto_trim($data) if $self->{is_auto_trim};
+    $data = $self->_prepare_data($data); 
 
     my ( %errors, %result );
 
@@ -200,11 +207,12 @@ sub _build_validator {
     return $self->{validator_builders}->{$name}->( @$args, $self->get_rules() );
 }
 
-sub _auto_trim {
+sub _prepare_data {
     my ( $self, $data ) = @_;
+    return $data if !$self->{is_auto_trim} and !$self->{is_clear_undef}; 
     my $ref_type = ref($data);
 
-    if ( !$ref_type && $data ) {
+    if ( !$ref_type and $data and $self->{is_auto_trim} ) {
         $data =~ s/^\s+//;
         $data =~ s/\s+$//;
         return $data;
@@ -213,7 +221,8 @@ sub _auto_trim {
         my $trimmed_data = {};
         
         foreach my $key ( keys %$data ) {
-            $trimmed_data->{$key} = $self->_auto_trim( $data->{$key} );
+            next if !defined $data->{$key} and $self->{is_clear_undef};
+            $trimmed_data->{$key} = $self->_prepare_data( $data->{$key} );
         }
 
         return $trimmed_data;
@@ -221,8 +230,9 @@ sub _auto_trim {
     elsif ( $ref_type eq 'ARRAY' ) {
         my $trimmed_data = []; 
 
-        for ( my $i = 0; $i < @$data; $i++ ) {
-            $trimmed_data->[$i] = $self->_auto_trim( $data->[$i] )
+        foreach my $filed ( @$data ) {
+            $filed = $self->_prepare_data( $filed );
+            push @$trimmed_data, $filed if !$self->{is_clear_undef} or defined $filed; 
         }
 
         return $trimmed_data;
