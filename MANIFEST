@@ -11,6 +11,7 @@ README.pod
 t/01-livr_test_suite.t
 t/02-rules_registration.t
 t/03-auto_trim.t
+t/04-clear_undef.t
 t/test_suite/negative/21-list_of_different_objects/input.json
 t/test_suite/negative/21-list_of_different_objects/rules.json
 t/test_suite/negative/21-list_of_different_objects/errors.json

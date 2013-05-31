@@ -43,7 +43,7 @@ my %DEFAULT_RULES = (
 );
 
 my $IS_DEFAULT_AUTO_TRIM = 0;
-my $IS_DEFAULT_CLEAR_UNDEF = 1;
+my $IS_DEFAULT_CLEAR_UNDEF = 0;
 
 sub new {
     my ($class, $livr_rules, $is_auto_trim, $is_clear_undef) = @_;
@@ -120,7 +120,9 @@ sub validate {
         return;
     }
 
-    $data = $self->_prepare_data($data); 
+    if ( $self->{is_auto_trim} or $self->{is_clear_undef} ) {
+        $data = $self->_prepare_data($data);
+    }
 
     my ( %errors, %result );
 
@@ -209,7 +211,6 @@ sub _build_validator {
 
 sub _prepare_data {
     my ( $self, $data ) = @_;
-    return $data if !$self->{is_auto_trim} and !$self->{is_clear_undef}; 
     my $ref_type = ref($data);
 
     if ( !$ref_type and $data and $self->{is_auto_trim} ) {
@@ -218,24 +219,24 @@ sub _prepare_data {
         return $data;
     } 
     elsif ( $ref_type eq 'HASH' ) {
-        my $trimmed_data = {};
+        my $processed_data = {};
         
         foreach my $key ( keys %$data ) {
             next if !defined $data->{$key} and $self->{is_clear_undef};
-            $trimmed_data->{$key} = $self->_prepare_data( $data->{$key} );
+            $processed_data->{$key} = $self->_prepare_data( $data->{$key} );
         }
 
-        return $trimmed_data;
+        return $processed_data;
     } 
     elsif ( $ref_type eq 'ARRAY' ) {
-        my $trimmed_data = []; 
+        my $processed_data = []; 
 
-        foreach my $filed ( @$data ) {
-            $filed = $self->_prepare_data( $filed );
-            push @$trimmed_data, $filed if !$self->{is_clear_undef} or defined $filed; 
+        foreach my $field ( @$data ) {
+            next if !defined $field and $self->{is_clear_undef};
+            push @$processed_data, $self->_prepare_data( $field ); 
         }
 
-        return $trimmed_data;
+        return $processed_data;
     } 
     
     return $data;
