@@ -252,6 +252,7 @@ Validator::LIVR - Lightweight validator supporting Language Independent Validati
 
     # Common usage
     Validator::LIVR->default_auto_trim(1);
+    Validator::LIVR->default_clear_undef(1);
 
     my $validator = Validator::LIVR->new({
         name      => 'required',
@@ -337,14 +338,15 @@ Features:
 
 =head1 CLASS METHODS
 
-=head2 Validator::LIVR->new( $LIVR [, $IS_AUTO_TRIM] )
+=head2 Validator::LIVR->new( $LIVR [, $IS_AUTO_TRIM, $IS_CLEAR_UNDEF] )
 
 Contructor creates validator objects.
 
 $LIVR - validations rules. Rules description is available here - L<https://github.com/koorchik/LIVR>
 
-$IS_AUTO_TRIM - asks validator to trim all values before validation. Output will be also trimmed.
-if $IS_AUTO_TRIM is undef than default_auto_trim value will be used.
+$IS_AUTO_TRIM - asks validator to trim all values before validation.
+$IS_CLEAR_UNDEF - asks validator to remove all undefined values before validation.
+Output will be also modified. if $IS_AUTO_TRIM or $IS_CLEAR_UNDEF is undef than default_auto_trim or default_clear_undef value will be used respectively.
 
 =head2 Validator::LIVR->register_default_rules( RULE_NAME => \&RULE_BUILDER, ... )
 
