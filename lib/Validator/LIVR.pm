@@ -12,11 +12,13 @@ use Validator::LIVR::Rules::Numeric;
 use Validator::LIVR::Rules::Special;
 use Validator::LIVR::Rules::Helpers;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 my %DEFAULT_RULES = (
     'required'         => \&Validator::LIVR::Rules::Common::required,
     'not_empty'        => \&Validator::LIVR::Rules::Common::not_empty,
+    'not_empty_list'   => \&Validator::LIVR::Rules::Common::not_empty_list,
+
 
     'one_of'           => \&Validator::LIVR::Rules::String::one_of,
     'min_length'       => \&Validator::LIVR::Rules::String::min_length,
