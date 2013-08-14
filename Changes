@@ -3,6 +3,8 @@ Revision history for Validator-LIVR
 0.01    Date/time
         First version, released on an unsuspecting world.
 
-0.02
-         
-         LIVR v0.2 support (not_empty_list) support
+0.02 
+        LIVR v0.2 support (not_empty_list) support
+
+0.03
+       Now validator passes the modifyed result to each next rule.    

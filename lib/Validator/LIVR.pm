@@ -12,7 +12,7 @@ use Validator::LIVR::Rules::Numeric;
 use Validator::LIVR::Rules::Special;
 use Validator::LIVR::Rules::Helpers;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 my %DEFAULT_RULES = (
     'required'         => \&Validator::LIVR::Rules::Common::required,
@@ -130,17 +130,19 @@ sub validate {
 
         foreach my $v_cb (@$validators) {
             undef($field_result);
-            my $err_code = $v_cb->($value, $data, \$field_result);
+            my $err_code = $v_cb->(
+                exists $result{$field_name} ? $result{$field_name} : $value, 
+                $data, 
+                \$field_result
+            );
 
             if ( $err_code ) {
                 $errors{$field_name} = $err_code;
                 $is_ok = 0;
                 last;
+            } elsif ( exists $data->{$field_name} ) {
+                $result{$field_name} = $field_result // $value;    
             }
-        }
-
-        if ( $is_ok && exists $data->{$field_name} ) {
-            $result{$field_name} = $field_result // $value;
         }
     }
 
