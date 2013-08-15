@@ -6,6 +6,7 @@ lib/Validator/LIVR/Rules/String.pm
 lib/Validator/LIVR/Rules/Numeric.pm
 lib/Validator/LIVR/Rules/Special.pm
 lib/Validator/LIVR/Rules/Helpers.pm
+lib/Validator/LIVR/Rules/Filters.pm
 MANIFEST			
 README.pod
 t/01-livr_test_suite.t
@@ -144,6 +145,15 @@ t/test_suite/positive/21-list_of_different_objects/rules.json
 t/test_suite/positive/22-not_empty_list/input.json
 t/test_suite/positive/22-not_empty_list/output.json
 t/test_suite/positive/22-not_empty_list/rules.json
+t/test_suite/positive/30-trim/input.json
+t/test_suite/positive/30-trim/output.json
+t/test_suite/positive/30-trim/rules.json
+t/test_suite/positive/31-to_lc/input.json
+t/test_suite/positive/31-to_lc/output.json
+t/test_suite/positive/31-to_lc/rules.json
+t/test_suite/positive/32-to_uc/input.json
+t/test_suite/positive/32-to_uc/output.json
+t/test_suite/positive/32-to_uc/rules.json
 Makefile.PL
 META.yml
 META.json

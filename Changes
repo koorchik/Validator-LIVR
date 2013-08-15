@@ -4,7 +4,10 @@ Revision history for Validator-LIVR
         First version, released on an unsuspecting world.
 
 0.02 
-        LIVR v0.2 support (not_empty_list) support
+        LIVR v0.2 support (not_empty_list)
 
 0.03
-       Now validator passes the modifyed result to each next rule.    
+        Fixed pipelining ( now validator passes the modifyed result to each next rule ). 
+
+0.04
+        LIVR v0.3 support (trim, to_lc, to_uc)
