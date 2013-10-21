@@ -1,8 +1,9 @@
-
 use 5.006;
 use strict;
 use warnings FATAL => 'all';
 use ExtUtils::MakeMaker;
+
+my( $mm ) = $ExtUtils::MakeMaker::VERSION =~ /^([^_]+)/; 
 
 WriteMakefile(
     NAME             => 'Validator::LIVR',
@@ -23,6 +24,16 @@ WriteMakefile(
     PREREQ_PM => {
         'Email::Valid' => '0',
     },
+    ( $mm < 6.46
+        ? ()
+        : ( META_MERGE => {
+              resources => {
+                  repository => 'https://github.com/koorchik/Validator-LIVR',
+              },
+              no_index => {directory => [qw/t/]},
+            }
+        )
+    ),
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'Validator-LIVR-*' },
 );
