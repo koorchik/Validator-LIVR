@@ -1,13 +1,14 @@
-Revision history for Validator-LIVR
+Revision history for Perl module Validator::LIVR
 
-0.01    Date/time
-        First version, released on an unsuspecting world.
+0.01 2013-02-02
+ - First version, released on an unsuspecting world.
 
-0.02 
-        LIVR v0.2 support (not_empty_list)
+0.02 2013-08-12
+ - LIVR v0.2 support (not_empty_list)
 
-0.03
-        Fixed pipelining ( now validator passes the modifyed result to each next rule ). 
+0.03 Not Released
+ - Fixed pipelining (now validator passes the modified
+   result to each next rule). 
 
-0.04
-        LIVR v0.3 support (trim, to_lc, to_uc)
+0.04 2013-08-15
+ - LIVR v0.3 support (trim, to_lc, to_uc)
