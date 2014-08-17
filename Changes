@@ -8,7 +8,10 @@ Revision history for Perl module Validator::LIVR
 
 0.03 Not Released
  - Fixed pipelining (now validator passes the modified
-   result to each next rule). 
+   result to each next rule).
 
 0.04 2013-08-15
  - LIVR v0.3 support (trim, to_lc, to_uc)
+
+0.05
+ - Fix bug with applying validation rule after filter
