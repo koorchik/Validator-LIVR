@@ -13,7 +13,7 @@ use Validator::LIVR::Rules::Special;
 use Validator::LIVR::Rules::Helpers;
 use Validator::LIVR::Rules::Filters;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 my %DEFAULT_RULES = (
     'required'         => \&Validator::LIVR::Rules::Common::required,
@@ -38,6 +38,8 @@ my %DEFAULT_RULES = (
 
     'email'            => \&Validator::LIVR::Rules::Special::email,
     'equal_to_field'   => \&Validator::LIVR::Rules::Special::equal_to_field,
+    'url'              => \&Validator::LIVR::Rules::Special::url,
+    'iso_date'         => \&Validator::LIVR::Rules::Special::iso_date,
 
     'nested_object'    => \&Validator::LIVR::Rules::Helpers::nested_object,
     'list_of'          => \&Validator::LIVR::Rules::Helpers::list_of,
@@ -47,6 +49,8 @@ my %DEFAULT_RULES = (
     'trim'             =>  \&Validator::LIVR::Rules::Filters::trim,
     'to_lc'            =>  \&Validator::LIVR::Rules::Filters::to_lc,
     'to_uc'            =>  \&Validator::LIVR::Rules::Filters::to_uc,
+    'remove'           =>  \&Validator::LIVR::Rules::Filters::remove,
+    'leave_only'       =>  \&Validator::LIVR::Rules::Filters::leave_only,
 );
 
 my $IS_DEFAULT_AUTO_TRIM = 0;
@@ -310,7 +314,7 @@ Validator::LIVR - Lightweight validator supporting Language Independent Validati
 
 L<Validator::LIVR> lightweight validator supporting Language Independent Validation Rules Specification (LIVR)
 
-See L<https://github.com/koorchik/LIVR> for details.
+See L<http://livr-spec.org> for rules documentation.
 
 Features:
 

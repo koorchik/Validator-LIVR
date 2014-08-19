@@ -3,7 +3,7 @@ use strict;
 use warnings FATAL => 'all';
 use ExtUtils::MakeMaker;
 
-my( $mm ) = $ExtUtils::MakeMaker::VERSION =~ /^([^_]+)/; 
+my( $mm ) = $ExtUtils::MakeMaker::VERSION =~ /^([^_]+)/;
 
 WriteMakefile(
     NAME             => 'Validator::LIVR',
@@ -22,7 +22,8 @@ WriteMakefile(
         'JSON'            => '0'
     },
     PREREQ_PM => {
-        'Email::Valid' => '0',
+        'Email::Valid'   => '0',
+        'Regexp::Common' => '0'
     },
     ( $mm < 6.46
         ? ()
