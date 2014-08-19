@@ -4,7 +4,15 @@ use strict;
 use warnings;
 
 sub one_of {
-    my $allowed_values = shift;
+
+    my $allowed_values;
+    if (ref $_[0] eq 'ARRAY') {
+        $allowed_values = $_[0];
+    } else {
+        $allowed_values = [@_];
+        pop @$allowed_values; # pop rule_builders
+    }
+
 
     return sub {
         my $value = shift;
