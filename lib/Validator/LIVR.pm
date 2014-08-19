@@ -85,6 +85,15 @@ sub register_default_rules {
     return $class;
 }
 
+sub register_aliased_default_rule {
+    my ( $class, $alias ) = @_;
+
+    die 'Alias name required' unless $alias->{name};
+    $DEFAULT_RULES{ $alias->{name} } = $class->_build_aliased_rule($alias);
+
+    return $class;
+}
+
 sub get_default_rules {
     return {%DEFAULT_RULES};
 }
@@ -181,6 +190,15 @@ sub register_rules {
     return $self;
 }
 
+sub register_aliased_rule {
+    my ( $self, $alias ) = @_;
+
+    die 'Alias name required' unless $alias->{name};
+    $self->{validator_builders}{ $alias->{name} } = $self->_build_aliased_rule($alias);
+
+    return $self;
+}
+
 sub get_rules {
     my $self = shift;
 
@@ -210,6 +228,33 @@ sub _build_validator {
     die "Rule [$name] not registered\n" unless $self->{validator_builders}->{$name};
 
     return $self->{validator_builders}->{$name}->( @$args, $self->get_rules() );
+}
+
+sub _build_aliased_rule {
+    my ($class, $alias) = @_;
+
+    die 'Alias name required'  unless $alias->{name};
+    die 'Alias rules required' unless $alias->{rules};
+
+    my $livr = { value => $alias->{rules} };
+
+     return sub {
+        my $rule_builders = shift;
+        my $validator = __PACKAGE__->new($livr)->register_rules(%$rule_builders)->prepare();
+
+        return sub {
+            my ($value, $params, $output_ref) = @_;
+
+            my $result = $validator->validate( { value => $value } );
+
+            if ( $result ) {
+                $$output_ref = $result->{value};
+                return;
+            } else {
+                return $alias->{error} || $validator->get_errors()->{value};
+            }
+        };
+    };
 }
 
 sub _auto_trim {
@@ -276,6 +321,19 @@ Validator::LIVR - Lightweight validator supporting Language Independent Validati
     });
 
     # Feel free to register your own rules
+    # You can create aliased rules
+
+    my $validator = Validator::LIVR->new({
+        password => ['required', 'strong_password']
+    });
+
+    $validator->register_aliased_rule({
+        name  => 'strong_password',
+        rules => {min_length: 6},
+        error => 'WEAK_PASSWORD'
+    });
+
+    # or you can write own rules with more complex logic
     my $validator = Validator::LIVR->new({
         password => ['required', 'strong_password']
     });
@@ -291,7 +349,6 @@ Validator::LIVR - Lightweight validator supporting Language Independent Validati
             return;
         }
     } );
-
 
 
     # If you want to stop on the first error
@@ -350,6 +407,7 @@ $LIVR - validations rules. Rules description is available here - L<https://githu
 
 $IS_AUTO_TRIM - asks validator to trim all values before validation. Output will be also trimmed.
 if $IS_AUTO_TRIM is undef than default_auto_trim value will be used.
+
 
 =head2 Validator::LIVR->register_default_rules( RULE_NAME => \&RULE_BUILDER, ... )
 
