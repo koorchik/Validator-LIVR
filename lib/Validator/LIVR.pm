@@ -290,6 +290,8 @@ sub _auto_trim {
 
 1; # End of Validator::LIVR
 
+=for HTML <a href="https://travis-ci.org/koorchik/Validator-LIVR"><img src="https://travis-ci.org/koorchik/Validator-LIVR.svg?branch=master"></a>
+
 =head1 NAME
 
 Validator::LIVR - Lightweight validator supporting Language Independent Validation Rules Specification (LIVR)
