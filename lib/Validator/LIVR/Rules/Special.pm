@@ -49,14 +49,14 @@ sub iso_date {
         my $value = shift;
         return if !defined($value) || $value eq '';
 
-        my $re = qr#^
+        my $iso_date_re = qr#^
             (?<year>\d{4})-
             (?<month>[0-1][0-9])-
             (?<day>[0-3][0-9])
         $#x;
 
-        if ( $value =~ $re ) {
-            my $date = eval { Time::Piece->strptime("$+{year}-$+{month}-$+{day}", "%Y-%m-%d") };
+        if ( $value =~ $iso_date_re ) {
+            my $date = eval { Time::Piece->strptime($value, "%Y-%m-%d") };
             return "WRONG_DATE" if !$date || $@;
 
             if ( $date->year == $+{year} && $date->mon == $+{month} && $date->mday == $+{day} ) {
