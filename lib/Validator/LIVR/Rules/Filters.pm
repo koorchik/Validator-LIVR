@@ -38,8 +38,8 @@ sub to_uc {
 }
 
 sub remove {
-    my $chars = join( '|', map { quotemeta($_) } split(//, shift) );
-    my $re = qr/$chars/;
+    my $chars = shift;
+    my $re = qr/[\Q$chars\E]/;
 
     return sub {
         my ( $value, undef, $output_ref ) = @_;
@@ -53,8 +53,8 @@ sub remove {
 }
 
 sub leave_only {
-    my $chars = join( '|', map { quotemeta($_) } split(//, shift) );
-    my $re = qr/[^$chars]/;
+    my $chars = shift;
+    my $re = qr/[^\Q$chars\E]/;
 
     return sub {
         my ( $value, undef, $output_ref ) = @_;
