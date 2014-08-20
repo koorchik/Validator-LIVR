@@ -4,7 +4,6 @@ use strict;
 use warnings;
 
 sub one_of {
-
     my $allowed_values;
     if (ref $_[0] eq 'ARRAY') {
         $allowed_values = $_[0];
@@ -81,7 +80,7 @@ sub length_between {
 sub like {
     my ($re, $flags) = @_;
 
-    my $is_ignore_case = $flags && index( $flags, 'i') >= 0;
+    my $is_ignore_case = @_ == 3 && index( $flags, 'i') >= 0;
     $re = $is_ignore_case ? qr/$re/i : qr/$re/;
 
     return sub {
