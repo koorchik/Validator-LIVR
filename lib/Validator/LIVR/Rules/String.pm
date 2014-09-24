@@ -4,7 +4,14 @@ use strict;
 use warnings;
 
 sub one_of {
-    my $allowed_values = shift;
+    my $allowed_values;
+    if (ref $_[0] eq 'ARRAY') {
+        $allowed_values = $_[0];
+    } else {
+        $allowed_values = [@_];
+        pop @$allowed_values; # pop rule_builders
+    }
+
 
     return sub {
         my $value = shift;
@@ -71,13 +78,16 @@ sub length_between {
 
 
 sub like {
-    my $re = shift;
+    my ($re, $flags) = @_;
+
+    my $is_ignore_case = @_ == 3 && index( $flags, 'i') >= 0;
+    $re = $is_ignore_case ? qr/$re/i : qr/$re/;
 
     return sub {
         my $value = shift;
         return if !defined($value) || $value eq '';
-        
-        return 'WRONG_FORMAT' unless $value =~ m/$re/;
+
+        return 'WRONG_FORMAT' unless $value =~  m/$re/;
         return;
     };
 }

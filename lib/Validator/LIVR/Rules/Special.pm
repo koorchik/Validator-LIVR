@@ -4,6 +4,8 @@ use strict;
 use warnings;
 
 use Email::Valid;
+use Regexp::Common qw/URI/;
+use Time::Piece;
 
 sub email {
     return sub {
@@ -25,6 +27,44 @@ sub equal_to_field {
 
         return 'FIELDS_NOT_EQUAL' unless $value eq $params->{$field};
         return;
+    };
+}
+
+
+sub url {
+    return sub {
+        my $value = shift;
+        return if !defined($value) || $value eq '';
+
+        $value =~ s/#[^#]*$//;
+
+        return 'WRONG_URL' unless lc($value) =~ /^$RE{URI}{HTTP}{-scheme => 'https?'}$/;
+        return;
+    };
+}
+
+
+sub iso_date {
+    return sub {
+        my $value = shift;
+        return if !defined($value) || $value eq '';
+
+        my $iso_date_re = qr#^
+            (?<year>\d{4})-
+            (?<month>[0-1][0-9])-
+            (?<day>[0-3][0-9])
+        $#x;
+
+        if ( $value =~ $iso_date_re ) {
+            my $date = eval { Time::Piece->strptime($value, "%Y-%m-%d") };
+            return "WRONG_DATE" if !$date || $@;
+
+            if ( $date->year == $+{year} && $date->mon == $+{month} && $date->mday == $+{day} ) {
+                return;
+            }
+        }
+
+        return "WRONG_DATE";
     };
 }
 

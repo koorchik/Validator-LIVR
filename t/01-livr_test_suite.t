@@ -33,6 +33,32 @@ iterate_test_data('test_suite/negative' => sub {
     is_deeply( $validator->get_errors(), $data->{errors}, 'Validator should contain valid errors' );
 });
 
+
+iterate_test_data('test_suite/aliases_positive' => sub {
+    my $data = shift;
+
+    my $validator = Validator::LIVR->new( $data->{rules} );
+    $validator->register_aliased_rule($_) for @{ $data->{aliases} };
+    my $output = $validator->validate( $data->{input} );
+
+    ok(! $validator->get_errors(), 'Validator should contain no errors' ) or diag explain $validator->get_errors();
+    is_deeply( $output, $data->{output}, 'Validator should return validated data' );
+});
+
+
+iterate_test_data('test_suite/aliases_negative' => sub {
+    my $data = shift;
+
+    my $validator = Validator::LIVR->new( $data->{rules} );
+    $validator->register_aliased_rule($_) for @{ $data->{aliases} };
+
+    my $output = $validator->validate( $data->{input} );
+
+    ok(!$output, 'Validator should return false');
+
+    is_deeply( $validator->get_errors(), $data->{errors}, 'Validator should contain valid errors' );
+});
+
 done_testing;
 
 sub iterate_test_data {
