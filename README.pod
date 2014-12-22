@@ -135,7 +135,7 @@ $ALIAS - is a hash that contains: name, rules, error (optional).
 Then you can use "valid\_address" for validation:
 
     {
-        address: 'valid_address'
+        address => 'valid_address'
     }
 
 
