@@ -5,6 +5,8 @@ use warnings;
 
 use Scalar::Util qw/looks_like_number/;
 
+our $VERSION = '0.07';
+
 sub integer {
     return sub {
         my $value = shift;
@@ -21,8 +23,8 @@ sub positive_integer {
         my $value = shift;
         return if !defined($value) || $value eq '';
 
-        return 'NOT_POSITIVE_INTEGER' unless $value =~ /^\d+$/ 
-                                      && looks_like_number($value) 
+        return 'NOT_POSITIVE_INTEGER' unless $value =~ /^\d+$/
+                                      && looks_like_number($value)
                                       && $value > 0;
         return;
     };
@@ -34,7 +36,7 @@ sub decimal {
         my $value = shift;
         return if !defined($value) || $value eq '';
 
-        return 'NOT_DECIMAL' unless $value =~ /^\-?[\d.]+$/ 
+        return 'NOT_DECIMAL' unless $value =~ /^\-?[\d.]+$/
                              && looks_like_number($value);
 
         return;
@@ -50,7 +52,7 @@ sub positive_decimal {
         return 'NOT_POSITIVE_DECIMAL' unless $value =~ /^\-?[\d.]+$/
                                       && looks_like_number($value)
                                       && $value > 0;
-                             
+
         return;
     };
 }

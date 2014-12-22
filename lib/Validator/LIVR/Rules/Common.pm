@@ -3,6 +3,8 @@ package Validator::LIVR::Rules::Common;
 use strict;
 use warnings;
 
+our $VERSION = '0.07';
+
 sub required {
     return sub {
         defined $_[0] && $_[0] ne '' ? undef : 'REQUIRED';

@@ -3,6 +3,8 @@ package Validator::LIVR::Rules::String;
 use strict;
 use warnings;
 
+our $VERSION = '0.07';
+
 sub one_of {
     my $allowed_values;
     if (ref $_[0] eq 'ARRAY') {
