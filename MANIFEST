@@ -199,3 +199,6 @@ t/test_suite/positive/33-remove/rules.json
 t/test_suite/positive/34-leave_only/input.json
 t/test_suite/positive/34-leave_only/output.json
 t/test_suite/positive/34-leave_only/rules.json
+t/test_suite/negative/07-lenght_between/errors.json
+t/test_suite/negative/07-lenght_between/input.json
+t/test_suite/negative/07-lenght_between/rules.json
