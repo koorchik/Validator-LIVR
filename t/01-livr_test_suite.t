@@ -30,7 +30,8 @@ iterate_test_data('test_suite/negative' => sub {
 
     ok(!$output, 'Validator should return false');
 
-    is_deeply( $validator->get_errors(), $data->{errors}, 'Validator should contain valid errors' );
+    is_deeply( $validator->get_errors(), $data->{errors}, 'Validator should contain valid errors' )
+        or diag explain { got_errors => $validator->get_errors(), test_data => $data };
 });
 
 

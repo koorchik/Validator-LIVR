@@ -21,3 +21,6 @@ Revision history for Perl module Validator::LIVR
 
 0.07
  - Add version to every pm file
+
+0.08
+ - More detailed debug in tests
