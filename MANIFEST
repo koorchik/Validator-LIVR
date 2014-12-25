@@ -58,9 +58,9 @@ t/test_suite/negative/05-max_length/rules.json
 t/test_suite/negative/06-length_equal/errors.json
 t/test_suite/negative/06-length_equal/input.json
 t/test_suite/negative/06-length_equal/rules.json
-t/test_suite/negative/07-lenght_between/errors.json
-t/test_suite/negative/07-lenght_between/input.json
-t/test_suite/negative/07-lenght_between/rules.json
+t/test_suite/negative/07-length_between/errors.json
+t/test_suite/negative/07-length_between/input.json
+t/test_suite/negative/07-length_between/rules.json
 t/test_suite/negative/08-like/errors.json
 t/test_suite/negative/08-like/input.json
 t/test_suite/negative/08-like/rules.json
@@ -199,6 +199,3 @@ t/test_suite/positive/33-remove/rules.json
 t/test_suite/positive/34-leave_only/input.json
 t/test_suite/positive/34-leave_only/output.json
 t/test_suite/positive/34-leave_only/rules.json
-t/test_suite/negative/07-lenght_between/errors.json
-t/test_suite/negative/07-lenght_between/input.json
-t/test_suite/negative/07-lenght_between/rules.json

@@ -7,7 +7,7 @@ use Email::Valid;
 use Regexp::Common qw/URI/;
 use Time::Piece;
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 sub email {
     return sub {

@@ -24,3 +24,6 @@ Revision history for Perl module Validator::LIVR
 
 0.08
  - More detailed debug in tests
+
+0.09
+ - Fix typo in MANIFEST paths
