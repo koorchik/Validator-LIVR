@@ -1,4 +1,3 @@
-Build.PL
 Changes
 lib/Validator/LIVR.pm
 lib/Validator/LIVR/Rules/Common.pm
@@ -14,8 +13,6 @@ t/02-rules_registration.t
 t/03-auto_trim.t
 t/04-custom_filters.t
 Makefile.PL
-META.yml
-META.json
 t/test_suite/aliases_negative/01-adult_age/aliases.json
 t/test_suite/aliases_negative/01-adult_age/errors.json
 t/test_suite/aliases_negative/01-adult_age/input.json
