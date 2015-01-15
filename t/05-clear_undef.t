@@ -14,7 +14,7 @@ my $validator = Validator::LIVR->new({
     address  => { nested_object  => {
         street   => [ 'not_empty', { 'min_length' => 5 } ],
         phones   => {'list_of' => [[ 'not_empty', {'length_equal' => 8} ]]},
-        building => [ 'not_empty', 'positive_integer' ] 
+        building => [ 'not_empty', 'positive_integer' ]
     } }
 }, undef, 'is_clear_undef');
 
