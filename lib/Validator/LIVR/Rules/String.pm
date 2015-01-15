@@ -3,7 +3,7 @@ package Validator::LIVR::Rules::String;
 use strict;
 use warnings;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 sub one_of {
     my $allowed_values;
@@ -18,6 +18,7 @@ sub one_of {
     return sub {
         my $value = shift;
         return if !defined($value) || $value eq '';
+        return 'FORMAT_ERROR' if ref($value);
 
         return 'NOT_ALLOWED_VALUE' unless grep { $value eq $_ } @$allowed_values;
         return;
@@ -31,6 +32,7 @@ sub max_length {
     return sub {
         my $value = shift;
         return if !defined($value) || $value eq '';
+        return 'FORMAT_ERROR' if ref($value);
 
         return 'TOO_LONG' if length($value) > $max_length;
         return;
@@ -44,6 +46,7 @@ sub min_length {
     return sub {
         my $value = shift;
         return if !defined($value) || $value eq '';
+        return 'FORMAT_ERROR' if ref($value);
 
         return 'TOO_SHORT' if length($value) < $min_length;
         return;
@@ -57,6 +60,7 @@ sub length_equal {
     return sub {
         my $value = shift;
         return if !defined($value) || $value eq '';
+        return 'FORMAT_ERROR' if ref($value);
 
         return 'TOO_SHORT' if length($value) < $length;
         return 'TOO_LONG' if length($value) > $length;
@@ -71,6 +75,7 @@ sub length_between {
     return sub {
         my $value = shift;
         return if !defined($value) || $value eq '';
+        return 'FORMAT_ERROR' if ref($value);
 
         return 'TOO_SHORT' if length($value) < $min_length;
         return 'TOO_LONG' if length($value) > $max_length;
@@ -88,6 +93,7 @@ sub like {
     return sub {
         my $value = shift;
         return if !defined($value) || $value eq '';
+        return 'FORMAT_ERROR' if ref($value);
 
         return 'WRONG_FORMAT' unless $value =~  m/$re/;
         return;

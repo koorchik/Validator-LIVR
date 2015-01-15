@@ -13,7 +13,7 @@ use Validator::LIVR::Rules::Special;
 use Validator::LIVR::Rules::Helpers;
 use Validator::LIVR::Rules::Filters;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 my %DEFAULT_RULES = (
     'required'         => \&Validator::LIVR::Rules::Common::required,

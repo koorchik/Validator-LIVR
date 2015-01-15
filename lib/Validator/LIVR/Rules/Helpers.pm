@@ -3,7 +3,7 @@ package Validator::LIVR::Rules::Helpers;
 use strict;
 use warnings;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 sub nested_object {
     my ($livr, $rule_builders) = @_;
