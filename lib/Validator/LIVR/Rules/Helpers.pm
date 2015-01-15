@@ -3,10 +3,11 @@ package Validator::LIVR::Rules::Helpers;
 use strict;
 use warnings;
 
+our $VERSION = '0.09';
 
 sub nested_object {
     my ($livr, $rule_builders) = @_;
-    
+
     my $validator = Validator::LIVR->new($livr)->register_rules(%$rule_builders)->prepare();
 
     return sub {
@@ -28,7 +29,15 @@ sub nested_object {
 
 
 sub list_of {
-    my ( $rules, $rule_builders ) = @_;
+    my ( $rules, $rule_builders );
+
+    if (ref $_[0] eq 'ARRAY') {
+        ( $rules, $rule_builders ) = @_;
+    } else {
+        $rules = [@_];
+        $rule_builders = pop @$rules;
+    }
+
     my $livr =  { field => $rules };
 
     my $validator = Validator::LIVR->new($livr)->register_rules(%$rule_builders)->prepare();
@@ -119,7 +128,7 @@ sub list_of_different_objects {
             }
 
             my $validator = $validators{ $obj->{$selector_field} };
-            
+
             if ( my $result = $validator->validate($obj) ) {
                 push @results, $result;
                 push @errors, undef;

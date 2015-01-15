@@ -11,12 +11,15 @@ use Validator::LIVR::Rules::String;
 use Validator::LIVR::Rules::Numeric;
 use Validator::LIVR::Rules::Special;
 use Validator::LIVR::Rules::Helpers;
+use Validator::LIVR::Rules::Filters;
 
-our $VERSION = '0.01';
+our $VERSION = '0.09';
 
 my %DEFAULT_RULES = (
     'required'         => \&Validator::LIVR::Rules::Common::required,
     'not_empty'        => \&Validator::LIVR::Rules::Common::not_empty,
+    'not_empty_list'   => \&Validator::LIVR::Rules::Common::not_empty_list,
+
 
     'one_of'           => \&Validator::LIVR::Rules::String::one_of,
     'min_length'       => \&Validator::LIVR::Rules::String::min_length,
@@ -35,11 +38,19 @@ my %DEFAULT_RULES = (
 
     'email'            => \&Validator::LIVR::Rules::Special::email,
     'equal_to_field'   => \&Validator::LIVR::Rules::Special::equal_to_field,
+    'url'              => \&Validator::LIVR::Rules::Special::url,
+    'iso_date'         => \&Validator::LIVR::Rules::Special::iso_date,
 
     'nested_object'    => \&Validator::LIVR::Rules::Helpers::nested_object,
     'list_of'          => \&Validator::LIVR::Rules::Helpers::list_of,
     'list_of_objects'  => \&Validator::LIVR::Rules::Helpers::list_of_objects,
     'list_of_different_objects' => \&Validator::LIVR::Rules::Helpers::list_of_different_objects,
+
+    'trim'             =>  \&Validator::LIVR::Rules::Filters::trim,
+    'to_lc'            =>  \&Validator::LIVR::Rules::Filters::to_lc,
+    'to_uc'            =>  \&Validator::LIVR::Rules::Filters::to_uc,
+    'remove'           =>  \&Validator::LIVR::Rules::Filters::remove,
+    'leave_only'       =>  \&Validator::LIVR::Rules::Filters::leave_only,
 );
 
 my $IS_DEFAULT_AUTO_TRIM = 0;
@@ -70,7 +81,16 @@ sub register_default_rules {
 
         $DEFAULT_RULES{$rule_name} = $rule_builder;
     }
-    
+
+    return $class;
+}
+
+sub register_aliased_default_rule {
+    my ( $class, $alias ) = @_;
+
+    die 'Alias name required' unless $alias->{name};
+    $DEFAULT_RULES{ $alias->{name} } = $class->_build_aliased_rule($alias);
+
     return $class;
 }
 
@@ -122,23 +142,24 @@ sub validate {
         next unless $validators && @$validators;
 
         my $value = $data->{$field_name};
-
         my $is_ok = 1;
-        my $field_result;
 
         foreach my $v_cb (@$validators) {
-            undef($field_result);
-            my $err_code = $v_cb->($value, $data, \$field_result);
+            my $field_result = $result{$field_name} // $value;
+
+            my $err_code = $v_cb->(
+                exists $result{$field_name} ? $result{$field_name} : $value,
+                $data,
+                \$field_result
+            );
 
             if ( $err_code ) {
                 $errors{$field_name} = $err_code;
                 $is_ok = 0;
                 last;
+            } elsif ( exists $data->{$field_name} ) {
+                $result{$field_name} = $field_result;
             }
-        }
-
-        if ( $is_ok && exists $data->{$field_name} ) {
-            $result{$field_name} = $field_result // $value;
         }
     }
 
@@ -165,7 +186,16 @@ sub register_rules {
 
         $self->{validator_builders}{$rule_name} = $rule_builder;
     }
-    
+
+    return $self;
+}
+
+sub register_aliased_rule {
+    my ( $self, $alias ) = @_;
+
+    die 'Alias name required' unless $alias->{name};
+    $self->{validator_builders}{ $alias->{name} } = $self->_build_aliased_rule($alias);
+
     return $self;
 }
 
@@ -200,6 +230,33 @@ sub _build_validator {
     return $self->{validator_builders}->{$name}->( @$args, $self->get_rules() );
 }
 
+sub _build_aliased_rule {
+    my ($class, $alias) = @_;
+
+    die 'Alias name required'  unless $alias->{name};
+    die 'Alias rules required' unless $alias->{rules};
+
+    my $livr = { value => $alias->{rules} };
+
+     return sub {
+        my $rule_builders = shift;
+        my $validator = __PACKAGE__->new($livr)->register_rules(%$rule_builders)->prepare();
+
+        return sub {
+            my ($value, $params, $output_ref) = @_;
+
+            my $result = $validator->validate( { value => $value } );
+
+            if ( $result ) {
+                $$output_ref = $result->{value};
+                return;
+            } else {
+                return $alias->{error} || $validator->get_errors()->{value};
+            }
+        };
+    };
+}
+
 sub _auto_trim {
     my ( $self, $data ) = @_;
     my $ref_type = ref($data);
@@ -208,30 +265,32 @@ sub _auto_trim {
         $data =~ s/^\s+//;
         $data =~ s/\s+$//;
         return $data;
-    } 
+    }
     elsif ( $ref_type eq 'HASH' ) {
         my $trimmed_data = {};
-        
+
         foreach my $key ( keys %$data ) {
             $trimmed_data->{$key} = $self->_auto_trim( $data->{$key} );
         }
 
         return $trimmed_data;
-    } 
+    }
     elsif ( $ref_type eq 'ARRAY' ) {
-        my $trimmed_data = []; 
+        my $trimmed_data = [];
 
         for ( my $i = 0; $i < @$data; $i++ ) {
             $trimmed_data->[$i] = $self->_auto_trim( $data->[$i] )
         }
 
         return $trimmed_data;
-    } 
-    
+    }
+
     return $data;
 }
 
 1; # End of Validator::LIVR
+
+=for HTML <a href="https://travis-ci.org/koorchik/Validator-LIVR"><img src="https://travis-ci.org/koorchik/Validator-LIVR.svg?branch=master"></a>
 
 =head1 NAME
 
@@ -245,7 +304,7 @@ Validator::LIVR - Lightweight validator supporting Language Independent Validati
     my $validator = Validator::LIVR->new({
         name      => 'required',
         email     => [ 'required', 'email' ],
-        gender    => { one_of => [['male', 'female']] },
+        gender    => { one_of => ['male', 'female'] },
         phone     => { max_length => 10 },
         password  => [ 'required', {min_length => 10} ],
         password2 => { equal_to_field => 'password' }
@@ -258,8 +317,26 @@ Validator::LIVR - Lightweight validator supporting Language Independent Validati
        ...
     }
 
+    # You can use filters separately or can combine them with validation:
+    my $validator = Validator::LIVR->new({
+        email => [ 'required', 'trim', 'email', 'to_lc' ]
+    });
 
     # Feel free to register your own rules
+    # You can use aliases(prefferable, syntax covered by the specification) for a lot of cases:
+
+    my $validator = Validator::LIVR->new({
+        password => ['required', 'strong_password']
+    });
+
+    $validator->register_aliased_rule({
+        name  => 'strong_password',
+        rules => {min_length => 6},
+        error => 'WEAK_PASSWORD'
+    });
+
+    # or you can write more sophisticated rules directly
+
     my $validator = Validator::LIVR->new({
         password => ['required', 'strong_password']
     });
@@ -269,7 +346,7 @@ Validator::LIVR - Lightweight validator supporting Language Independent Validati
             my $value = shift;
 
             # We already have "required" rule to check that the value is present
-            return if !defined($value) || $value eq ''; 
+            return if !defined($value) || $value eq '';
 
             return 'WEAK_PASSWORD' if length($value) < 6;
             return;
@@ -277,15 +354,14 @@ Validator::LIVR - Lightweight validator supporting Language Independent Validati
     } );
 
 
-
-    # If you want to stop on the first error 
+    # If you want to stop on the first error
     # you can overwrite all rules with your own which use exceptions
     my $default_rules = Validator::LIVR->ger_default_rules();
-     
+
     while ( my ($rule_name, $rule_builder) = each %$default_rules ) {
         Validator::LIVR->register_default_rules($rule_name => sub {
             my $rule_validator = $rule_builder->(@_);
-            
+
             return sub {
                 my $error = $rule_validator->(@_);
                 die $error if $error;
@@ -298,7 +374,7 @@ Validator::LIVR - Lightweight validator supporting Language Independent Validati
 
 L<Validator::LIVR> lightweight validator supporting Language Independent Validation Rules Specification (LIVR)
 
-See L<https://github.com/koorchik/LIVR> for details.
+See L<http://livr-spec.org> for rules documentation.
 
 Features:
 
@@ -335,6 +411,37 @@ $LIVR - validations rules. Rules description is available here - L<https://githu
 $IS_AUTO_TRIM - asks validator to trim all values before validation. Output will be also trimmed.
 if $IS_AUTO_TRIM is undef than default_auto_trim value will be used.
 
+=head2 Validator::LIVR->register_aliased_default_rule( $ALIAS )
+
+$ALIAS - is a hash that contains: name, rules, error (optional).
+
+    Validator::LIVR->register_aliased_default_rule({
+        name  => 'valid_address',
+        rules => { nested_object => {
+            country => 'required',
+            city    => 'required',
+            zip     => 'positive_integer'
+        }}
+    });
+
+Then you can use "valid\_address" for validation:
+
+    {
+        address => 'valid_address'
+    }
+
+
+You can register aliases with own errors:
+
+    Validator::LIVR->register_aliased_default_rule({
+        name  => 'adult_age'
+        rules => [ 'positive_integer', { min_number => 18 } ],
+        error => 'WRONG_AGE'
+    });
+
+All rules/aliases for the validator are equal. The validator does not distinguish "required", "list\_of\_different\_objects" and "trim" rules. So, you can extend validator with any rules/alias you like.
+
+
 =head2 Validator::LIVR->register_default_rules( RULE_NAME => \&RULE_BUILDER, ... )
 
 &RULE_BUILDER - is a subtorutine reference which will be called for building single rule validator.
@@ -342,26 +449,26 @@ if $IS_AUTO_TRIM is undef than default_auto_trim value will be used.
 
     Validator::LIVR->register_default_rules( my_rule => sub {
         my ($arg1, $arg2, $arg3, $rule_builders) =  @_;
-        
-        # $rule_builders - are rules from original validator 
+
+        # $rule_builders - are rules from original validator
         # to allow you create new validator with all supported rules
         # my $validator = Validator::LIVR->new($livr)->register_rules(%$rule_builders)->prepare();
 
         return sub {
             my ( $value, $all_values, $output_ref ) = @_;
-            
+
             if ($not_valid) {
-                return "SOME_ERROR_CODE"    
+                return "SOME_ERROR_CODE"
             }
             else {
-                
+
             }
-            
+
         }
     });
 
 Then you can use "my_rule" for validation:
-    
+
     {
         name1 => 'my_rule' # Call without parameters
         name2 => { 'my_rule' => $arg1 } # Call with one parameter.
@@ -374,12 +481,12 @@ Here is "max_number" implemenation:
 
     sub max_number {
         my $max_number = shift;
-        
+
         return sub {
             my $value = shift;
 
             # We do not validate empty fields. We have "required" rule for this purpose
-            return if !defined($value) || $value eq ''; 
+            return if !defined($value) || $value eq '';
 
             return 'TOO_HIGH' if $value > $max_number; # Return error message
             return; # returning undef means that there was no errors;
@@ -388,7 +495,7 @@ Here is "max_number" implemenation:
 
     Validator::LIVR->register_default_rules( max_number => \&max_number );
 
-All rules for the validator are equal. It does not distinguish "required" and "list_of_different_objects" rule.
+All rules for the validator are equal. It does not distinguish "required", "list_of_different_objects" and "trim" rules.
 So, you can extend validator with any rules you like.
 
 Just look at the existing rules implementation:
@@ -405,6 +512,8 @@ Just look at the existing rules implementation:
 
 =item * L<Validator::LIVR::Rules::Helpers>;
 
+=item * L<Validator::LIVR::Rules::Filters>;
+
 =back
 
 All rules description is available here - L<https://github.com/koorchik/LIVR>
@@ -412,7 +521,7 @@ All rules description is available here - L<https://github.com/koorchik/LIVR>
 
 =head2 Validator::LIVR->get_default_rules( )
 
-returns hashref containing all default rule_builders for the validator. 
+returns hashref containing all default rule_builders for the validator.
 You can register new rule or update existing one with "register_rules" method.
 
 =head2 Validator::LIVR->default_auto_trim($IS_AUTO_TRIM)
@@ -423,12 +532,12 @@ Enables or disables automatic trim for input data. If is on then every new valid
 
 =head2 $VALIDATOR->validate(\%INPUT)
 
-Validates user input. On success returns $VALID_DATA (contains only data that has described validation rules). On error return false. 
+Validates user input. On success returns $VALID_DATA (contains only data that has described validation rules). On error return false.
 
     my $VALID_DATA = $VALIDATOR->validate(\%INPUT)
 
     if ($VALID_DATA) {
-        
+
     } else {
         my $errors = $VALIDATOR->get_errors();
     }
@@ -450,13 +559,19 @@ For example:
         "zip"      => "NOT_POSITIVE_INTEGER",
         "street"   => "REQUIRED",
         "building" => "NOT_POSITIVE_INTEGER"
-    },    
+    },
 
 =head2 $VALIDATOR->register_rules( RULE_NAME => \&RULE_BUILDER, ... )
 
 &RULE_BUILDER - is a subtorutine reference which will be called for building single rule validator.
 
 See "Validator::LIVR->register_default_rules" for rules examples.
+
+=head2 $VALIDATOR->register_aliased_rule( $ALIAS )
+
+$ALIAS - is a composite validation rule.
+
+See "Validator::LIVR->register_aliased_default_rule" for rules examples.
 
 =head2 $VALIDATOR->get_rules( )
 
