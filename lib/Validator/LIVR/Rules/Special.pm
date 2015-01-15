@@ -7,12 +7,13 @@ use Email::Valid;
 use Regexp::Common qw/URI/;
 use Time::Piece;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 sub email {
     return sub {
         my $value = shift;
         return if !defined($value) || $value eq '';
+        return 'FORMAT_ERROR' if ref($value);
 
         return 'WRONG_EMAIL' unless Email::Valid->address($value);
         return;
@@ -26,6 +27,7 @@ sub equal_to_field {
     return sub {
         my ( $value, $params ) = @_;
         return if !defined($value) || $value eq '';
+        return 'FORMAT_ERROR' if ref($value);
 
         return 'FIELDS_NOT_EQUAL' unless $value eq $params->{$field};
         return;
@@ -37,6 +39,7 @@ sub url {
     return sub {
         my $value = shift;
         return if !defined($value) || $value eq '';
+        return 'FORMAT_ERROR' if ref($value);
 
         $value =~ s/#[^#]*$//;
 
@@ -50,6 +53,7 @@ sub iso_date {
     return sub {
         my $value = shift;
         return if !defined($value) || $value eq '';
+        return 'FORMAT_ERROR' if ref($value);
 
         my $iso_date_re = qr#^
             (?<year>\d{4})-
