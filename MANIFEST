@@ -12,6 +12,7 @@ t/01-livr_test_suite.t
 t/02-rules_registration.t
 t/03-auto_trim.t
 t/04-custom_filters.t
+t/05-clear_undef.t
 Makefile.PL
 t/test_suite/aliases_negative/01-adult_age/aliases.json
 t/test_suite/aliases_negative/01-adult_age/errors.json

@@ -54,9 +54,10 @@ my %DEFAULT_RULES = (
 );
 
 my $IS_DEFAULT_AUTO_TRIM = 0;
+my $IS_DEFAULT_CLEAR_UNDEF = 0;
 
 sub new {
-    my ($class, $livr_rules, $is_auto_trim) = @_;
+    my ($class, $livr_rules, $is_auto_trim, $is_clear_undef) = @_;
 
     my $self = bless {
         is_prepared        => 0,
@@ -64,7 +65,8 @@ sub new {
         validators         => {},
         validator_builders => {},
         errors             => undef,
-        is_auto_trim       => ( $is_auto_trim // $IS_DEFAULT_AUTO_TRIM )
+        is_auto_trim       => ( $is_auto_trim   // $IS_DEFAULT_AUTO_TRIM ),
+        is_clear_undef     => ( $is_clear_undef // $IS_DEFAULT_CLEAR_UNDEF )
     }, $class;
 
     $self->register_rules(%DEFAULT_RULES);
@@ -103,6 +105,11 @@ sub default_auto_trim {
     $IS_DEFAULT_AUTO_TRIM = !!$is_auto_trim;
 }
 
+sub default_clear_undef {
+    my ($class, $is_clear_undef) = @_;
+    $IS_DEFAULT_CLEAR_UNDEF = !!$is_clear_undef;
+}
+
 sub prepare {
     my $self = shift;
 
@@ -133,7 +140,9 @@ sub validate {
         return;
     }
 
-    $data = $self->_auto_trim($data) if $self->{is_auto_trim};
+    if ( $self->{is_auto_trim} or $self->{is_clear_undef} ) {
+        $data = $self->_prepare_data($data);
+    }
 
     my ( %errors, %result );
 
@@ -257,32 +266,34 @@ sub _build_aliased_rule {
     };
 }
 
-sub _auto_trim {
+sub _prepare_data {
     my ( $self, $data ) = @_;
     my $ref_type = ref($data);
 
-    if ( !$ref_type && $data ) {
+    if ( !$ref_type and $data and $self->{is_auto_trim} ) {
         $data =~ s/^\s+//;
         $data =~ s/\s+$//;
         return $data;
     }
     elsif ( $ref_type eq 'HASH' ) {
-        my $trimmed_data = {};
+        my $processed_data = {};
 
         foreach my $key ( keys %$data ) {
-            $trimmed_data->{$key} = $self->_auto_trim( $data->{$key} );
+            next if !defined $data->{$key} and $self->{is_clear_undef};
+            $processed_data->{$key} = $self->_prepare_data( $data->{$key} );
         }
 
-        return $trimmed_data;
+        return $processed_data;
     }
     elsif ( $ref_type eq 'ARRAY' ) {
-        my $trimmed_data = [];
+        my $processed_data = [];
 
-        for ( my $i = 0; $i < @$data; $i++ ) {
-            $trimmed_data->[$i] = $self->_auto_trim( $data->[$i] )
+        foreach my $field ( @$data ) {
+            next if !defined $field and $self->{is_clear_undef};
+            push @$processed_data, $self->_prepare_data( $field );
         }
 
-        return $trimmed_data;
+        return $processed_data;
     }
 
     return $data;
@@ -300,6 +311,7 @@ Validator::LIVR - Lightweight validator supporting Language Independent Validati
 
     # Common usage
     Validator::LIVR->default_auto_trim(1);
+    Validator::LIVR->default_clear_undef(1);
 
     my $validator = Validator::LIVR->new({
         name      => 'required',
@@ -402,14 +414,15 @@ Features:
 
 =head1 CLASS METHODS
 
-=head2 Validator::LIVR->new( $LIVR [, $IS_AUTO_TRIM] )
+=head2 Validator::LIVR->new( $LIVR [, $IS_AUTO_TRIM, $IS_CLEAR_UNDEF] )
 
 Contructor creates validator objects.
 
 $LIVR - validations rules. Rules description is available here - L<https://github.com/koorchik/LIVR>
 
-$IS_AUTO_TRIM - asks validator to trim all values before validation. Output will be also trimmed.
-if $IS_AUTO_TRIM is undef than default_auto_trim value will be used.
+$IS_AUTO_TRIM - asks validator to trim all values before validation.
+$IS_CLEAR_UNDEF - asks validator to remove all undefined values before validation.
+Output will be also modified. if $IS_AUTO_TRIM or $IS_CLEAR_UNDEF is undef than default_auto_trim or default_clear_undef value will be used respectively.
 
 =head2 Validator::LIVR->register_aliased_default_rule( $ALIAS )
 
