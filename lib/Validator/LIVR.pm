@@ -2,7 +2,7 @@ package Validator::LIVR;
 
 use v5.10;
 use strict;
-use warnings FATAL => 'all';
+use warnings;
 
 my $croak = sub {require Carp; goto &Carp::croak};
 
