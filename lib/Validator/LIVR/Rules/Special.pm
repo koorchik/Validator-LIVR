@@ -3,14 +3,12 @@ package Validator::LIVR::Rules::Special;
 use strict;
 use warnings;
 
-use Email::Valid;
-use Regexp::Common qw/URI/;
-use Time::Piece;
-
 our $VERSION = '0.10';
 
 sub email {
-    return sub {
+    require Email::Valid;
+    no warnings 'redefine';
+    *__PACKAGE__::email = sub {
         my $value = shift;
         return if !defined($value) || $value eq '';
         return 'FORMAT_ERROR' if ref($value);
@@ -36,21 +34,25 @@ sub equal_to_field {
 
 
 sub url {
-    return sub {
+    require Regexp::Common::URI;
+    no warnings qw'redefine once';
+    *__PACKAGE__::url = sub {
         my $value = shift;
         return if !defined($value) || $value eq '';
         return 'FORMAT_ERROR' if ref($value);
 
         $value =~ s/#[^#]*$//;
 
-        return 'WRONG_URL' unless lc($value) =~ /^$RE{URI}{HTTP}{-scheme => 'https?'}$/;
+        return 'WRONG_URL' unless lc($value) =~ /^$Regexp::Common::RE{URI}{HTTP}{-scheme => 'https?'}$/;
         return;
     };
 }
 
 
 sub iso_date {
-    return sub {
+    require Time::Piece;
+    no warnings 'redefine';
+    *__PACKAGE__::iso_date = sub {
         my $value = shift;
         return if !defined($value) || $value eq '';
         return 'FORMAT_ERROR' if ref($value);
