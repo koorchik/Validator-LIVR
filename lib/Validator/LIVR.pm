@@ -2,9 +2,9 @@ package Validator::LIVR;
 
 use v5.10;
 use strict;
-use warnings FATAL => 'all';
+use warnings;
 
-use Carp qw/croak/;
+my $croak = sub {require Carp; goto &Carp::croak};
 
 use Validator::LIVR::Rules::Common;
 use Validator::LIVR::Rules::String;
@@ -77,7 +77,7 @@ sub register_default_rules {
 
     foreach my $rule_name ( keys %rules ) {
         my $rule_builder = $rules{$rule_name};
-        croak "RULE_BUILDER [$rule_name] SHOULD BE A CODEREF" unless ref($rule_builder) eq 'CODE';
+        $croak->("RULE_BUILDER [$rule_name] SHOULD BE A CODEREF") unless ref($rule_builder) eq 'CODE';
 
         $DEFAULT_RULES{$rule_name} = $rule_builder;
     }
@@ -182,7 +182,7 @@ sub register_rules {
 
     foreach my $rule_name ( keys %rules ) {
         my $rule_builder = $rules{$rule_name};
-        croak "RULE_BUILDER [$rule_name] SHOULD BE A CODEREF" unless ref($rule_builder) eq 'CODE';
+        $croak->("RULE_BUILDER [$rule_name] SHOULD BE A CODEREF") unless ref($rule_builder) eq 'CODE';
 
         $self->{validator_builders}{$rule_name} = $rule_builder;
     }
