@@ -10,8 +10,8 @@ use Validator::LIVR::Rules::Common;
 use Validator::LIVR::Rules::String;
 use Validator::LIVR::Rules::Numeric;
 use Validator::LIVR::Rules::Special;
-use Validator::LIVR::Rules::Helpers;
-use Validator::LIVR::Rules::Filters;
+use Validator::LIVR::Rules::Meta;
+use Validator::LIVR::Rules::Modifiers;
 
 our $VERSION = '2.0';
 
@@ -43,20 +43,20 @@ my %DEFAULT_RULES = (
     'url'              => \&Validator::LIVR::Rules::Special::url,
     'iso_date'         => \&Validator::LIVR::Rules::Special::iso_date,
 
-    'nested_object'    => \&Validator::LIVR::Rules::Helpers::nested_object,
-    'variable_object'  => \&Validator::LIVR::Rules::Helpers::variable_object,
-    'list_of'          => \&Validator::LIVR::Rules::Helpers::list_of,
-    'list_of_objects'  => \&Validator::LIVR::Rules::Helpers::list_of_objects,
-    'or'               => \&Validator::LIVR::Rules::Helpers::livr_or,
-    'list_of_different_objects' => \&Validator::LIVR::Rules::Helpers::list_of_different_objects,
+    'nested_object'    => \&Validator::LIVR::Rules::Meta::nested_object,
+    'variable_object'  => \&Validator::LIVR::Rules::Meta::variable_object,
+    'list_of'          => \&Validator::LIVR::Rules::Meta::list_of,
+    'list_of_objects'  => \&Validator::LIVR::Rules::Meta::list_of_objects,
+    'or'               => \&Validator::LIVR::Rules::Meta::livr_or,
+    'list_of_different_objects' => \&Validator::LIVR::Rules::Meta::list_of_different_objects,
 
 
-    'trim'             =>  \&Validator::LIVR::Rules::Filters::trim,
-    'to_lc'            =>  \&Validator::LIVR::Rules::Filters::to_lc,
-    'to_uc'            =>  \&Validator::LIVR::Rules::Filters::to_uc,
-    'remove'           =>  \&Validator::LIVR::Rules::Filters::remove,
-    'leave_only'       =>  \&Validator::LIVR::Rules::Filters::leave_only,
-    'default'          =>  \&Validator::LIVR::Rules::Filters::default,
+    'trim'             =>  \&Validator::LIVR::Rules::Modifiers::trim,
+    'to_lc'            =>  \&Validator::LIVR::Rules::Modifiers::to_lc,
+    'to_uc'            =>  \&Validator::LIVR::Rules::Modifiers::to_uc,
+    'remove'           =>  \&Validator::LIVR::Rules::Modifiers::remove,
+    'leave_only'       =>  \&Validator::LIVR::Rules::Modifiers::leave_only,
+    'default'          =>  \&Validator::LIVR::Rules::Modifiers::default,
 );
 
 my $IS_DEFAULT_AUTO_TRIM = 0;
@@ -325,7 +325,7 @@ Validator::LIVR - Lightweight validator supporting Language Independent Validati
        ...
     }
 
-    # You can use filters separately or can combine them with validation:
+    # You can use modifiers separately or can combine them with validation:
     my $validator = Validator::LIVR->new({
         email => [ 'required', 'trim', 'email', 'to_lc' ]
     });
@@ -518,9 +518,9 @@ Just look at the existing rules implementation:
 
 =item * L<Validator::LIVR::Rules::Special>;
 
-=item * L<Validator::LIVR::Rules::Helpers>;
+=item * L<Validator::LIVR::Rules::Meta>;
 
-=item * L<Validator::LIVR::Rules::Filters>;
+=item * L<Validator::LIVR::Rules::Modifiers>;
 
 =back
 

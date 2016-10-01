@@ -1,4 +1,4 @@
-package Validator::LIVR::Rules::Filters;
+package Validator::LIVR::Rules::Modifiers;
 
 use strict;
 use warnings;

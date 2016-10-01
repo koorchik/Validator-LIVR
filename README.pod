@@ -25,7 +25,7 @@ Validator::LIVR - Lightweight validator supporting Language Independent Validati
        ...
     }
 
-    # You can use filters separately or can combine them with validation:
+    # You can use modifiers separately or can combine them with validation:
     my $validator = Validator::LIVR->new({
         email => [ 'required', 'trim', 'email', 'to_lc' ]
     });
@@ -218,9 +218,9 @@ Just look at the existing rules implementation:
 
 =item * L<Validator::LIVR::Rules::Special>;
 
-=item * L<Validator::LIVR::Rules::Helpers>;
+=item * L<Validator::LIVR::Rules::Meta>;
 
-=item * L<Validator::LIVR::Rules::Filters>;
+=item * L<Validator::LIVR::Rules::Modifiers>;
 
 =back
 
@@ -369,4 +369,3 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 =cut
-
