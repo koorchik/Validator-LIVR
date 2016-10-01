@@ -3,7 +3,7 @@ package Validator::LIVR::Rules::Common;
 use strict;
 use warnings;
 
-our $VERSION = '0.10';
+our $VERSION = '2.0';
 
 sub required {
     return sub {
@@ -18,14 +18,21 @@ sub not_empty {
 }
 
 sub not_empty_list {
-    sub {
+    return sub {
         my $list = shift;
         return 'CANNOT_BE_EMPTY' if !defined($list) || $list eq '';
-        return 'WRONG_FORMAT' if ref($list) ne 'ARRAY';
+        return 'FORMAT_ERROR' if ref($list) ne 'ARRAY';
         return 'CANNOT_BE_EMPTY' unless scalar @$list;
         return;
     }
 }
 
+sub any_object {
+    return sub {
+        my $value = shift;
+        return if !defined($value) || $value eq '';
+        return 'FORMAT_ERROR' if ref($value) ne 'HASH';
+    }
+}
 
 1;

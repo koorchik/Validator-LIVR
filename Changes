@@ -27,3 +27,18 @@ Revision history for Perl module Validator::LIVR
 
 0.09
  - Fix typo in MANIFEST paths
+
+v2.0
+ - Switched to semver. New release version is 2.0
+ - Unified approach to types handling
+ - "Base rules" renamed to "Common rules".
+ - "Filter rules" renamed to "Modifiers". They do not validate anything, just modify data.
+ - "Helper rules" renamed to "Metarules" as this rules are for describing other rules
+ - Added common rule "any_object"
+ - Added string rule "string"
+ - Added string rule "eq"
+ - Added metarule "variable_object"
+ - Added metarule "or"
+ - Added modifier "default"
+ - Add more edge cases to test suite
+ - Add experimental status to the "like" rule

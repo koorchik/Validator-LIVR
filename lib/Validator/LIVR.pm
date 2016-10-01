@@ -13,13 +13,13 @@ use Validator::LIVR::Rules::Special;
 use Validator::LIVR::Rules::Helpers;
 use Validator::LIVR::Rules::Filters;
 
-our $VERSION = '0.10';
+our $VERSION = '2.0';
 
 my %DEFAULT_RULES = (
     'required'         => \&Validator::LIVR::Rules::Common::required,
     'not_empty'        => \&Validator::LIVR::Rules::Common::not_empty,
     'not_empty_list'   => \&Validator::LIVR::Rules::Common::not_empty_list,
-
+    'any_object'       => \&Validator::LIVR::Rules::Common::any_object,
 
     'one_of'           => \&Validator::LIVR::Rules::String::one_of,
     'min_length'       => \&Validator::LIVR::Rules::String::min_length,
@@ -27,6 +27,8 @@ my %DEFAULT_RULES = (
     'length_equal'     => \&Validator::LIVR::Rules::String::length_equal,
     'length_between'   => \&Validator::LIVR::Rules::String::length_between,
     'like'             => \&Validator::LIVR::Rules::String::like,
+    'string'           => \&Validator::LIVR::Rules::String::string,
+    'eq'               => \&Validator::LIVR::Rules::String::equal,
 
     'integer'          => \&Validator::LIVR::Rules::Numeric::integer,
     'positive_integer' => \&Validator::LIVR::Rules::Numeric::positive_integer,
@@ -42,15 +44,19 @@ my %DEFAULT_RULES = (
     'iso_date'         => \&Validator::LIVR::Rules::Special::iso_date,
 
     'nested_object'    => \&Validator::LIVR::Rules::Helpers::nested_object,
+    'variable_object'  => \&Validator::LIVR::Rules::Helpers::variable_object,
     'list_of'          => \&Validator::LIVR::Rules::Helpers::list_of,
     'list_of_objects'  => \&Validator::LIVR::Rules::Helpers::list_of_objects,
+    'or'               => \&Validator::LIVR::Rules::Helpers::livr_or,
     'list_of_different_objects' => \&Validator::LIVR::Rules::Helpers::list_of_different_objects,
+
 
     'trim'             =>  \&Validator::LIVR::Rules::Filters::trim,
     'to_lc'            =>  \&Validator::LIVR::Rules::Filters::to_lc,
     'to_uc'            =>  \&Validator::LIVR::Rules::Filters::to_uc,
     'remove'           =>  \&Validator::LIVR::Rules::Filters::remove,
     'leave_only'       =>  \&Validator::LIVR::Rules::Filters::leave_only,
+    'default'          =>  \&Validator::LIVR::Rules::Filters::default,
 );
 
 my $IS_DEFAULT_AUTO_TRIM = 0;
@@ -157,7 +163,9 @@ sub validate {
                 $errors{$field_name} = $err_code;
                 $is_ok = 0;
                 last;
-            } elsif ( exists $data->{$field_name} ) {
+            } elsif ( defined($field_result) ) {
+                $result{$field_name} = $field_result;
+            } elsif ( exists $data->{$field_name} && ! exists $result{$field_name}) {
                 $result{$field_name} = $field_result;
             }
         }
@@ -661,5 +669,3 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 =cut
-
-

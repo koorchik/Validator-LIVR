@@ -17,7 +17,11 @@ iterate_test_data('test_suite/positive' => sub {
     my $validator = Validator::LIVR->new( $data->{rules} );
     my $output = $validator->validate( $data->{input} );
 
-    ok(! $validator->get_errors(), 'Validator should contain no errors' ) or diag explain $validator->get_errors();
+    ok(! $validator->get_errors(), 'Validator should contain no errors' ) or diag explain {
+        got_errors => $validator->get_errors(),
+        test_data  => $data,
+    };
+
     is_deeply( $output, $data->{output}, 'Validator should return validated data' );
 });
 
@@ -31,7 +35,7 @@ iterate_test_data('test_suite/negative' => sub {
     ok(!$output, 'Validator should return false');
 
     is_deeply( $validator->get_errors(), $data->{errors}, 'Validator should contain valid errors' )
-        or diag explain { got_errors => $validator->get_errors(), test_data => $data };
+        or (diag(explain({ got_errors => $validator->get_errors(), test_data => $data })) && exit);
 });
 
 

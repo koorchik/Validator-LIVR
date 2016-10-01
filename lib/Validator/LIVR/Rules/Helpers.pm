@@ -3,7 +3,7 @@ package Validator::LIVR::Rules::Helpers;
 use strict;
 use warnings;
 
-our $VERSION = '0.10';
+our $VERSION = '2.0';
 
 sub nested_object {
     my ($livr, $rule_builders) = @_;
@@ -143,6 +143,70 @@ sub list_of_different_objects {
             $$output_ref = \@results;
             return;
         }
+    }
+}
+
+
+
+sub variable_object {
+    my ( $selector_field, $livrs, $rule_builders ) = @_;
+
+    my %validators;
+    foreach my $selector_value ( keys %$livrs ) {
+        my $validator = Validator::LIVR->new( $livrs->{$selector_value} )->register_rules(%$rule_builders)->prepare();
+
+        $validators{$selector_value} = $validator;
+    }
+
+
+    return sub {
+        my ( $object, $params, $output_ref ) = @_;
+        return if !defined($object) || $object eq '';
+
+
+        if ( ref($object) ne 'HASH' || !$object->{$selector_field} || !$validators{$object->{$selector_field}} ) {
+            return 'FORMAT_ERROR';
+        }
+
+        my $validator = $validators{ $object->{$selector_field} };
+
+        if ( my $result = $validator->validate($object) ) {
+            $$output_ref = $result;
+            return;
+        } else {
+            return $validator->get_errors();
+        }
+    }
+}
+
+
+sub livr_or { # we call it livr_or to avoid conflicts with the "or" operator
+    my @rule_sets = @_;
+    my $rule_builders = pop @rule_sets;
+
+    my @validators = map {
+        Validator::LIVR->new( { field => $_ } )->register_rules(%$rule_builders)->prepare()
+    } @rule_sets;
+
+    return sub {
+        my ($value, undef, $output_ref) = @_;
+        return if !defined($value) || $value eq '';
+
+        my $last_error;
+
+        for my $validator (@validators) {
+            my $result = $validator->validate({ field => $value });
+
+            if ($result) {
+                $$output_ref = $result->{field};
+                return;
+            } else {
+                $last_error = $validator->get_errors()->{field};
+            }
+        }
+
+        return $last_error if $last_error;
+        return;
     }
 }
 

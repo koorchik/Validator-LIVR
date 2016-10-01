@@ -3,7 +3,7 @@ package Validator::LIVR::Rules::String;
 use strict;
 use warnings;
 
-our $VERSION = '0.10';
+our $VERSION = '2.0';
 
 sub one_of {
     my $allowed_values;
@@ -16,12 +16,18 @@ sub one_of {
 
 
     return sub {
-        my $value = shift;
+        my ($value, undef, $output_ref) = @_;
         return if !defined($value) || $value eq '';
-        return 'FORMAT_ERROR' if ref($value);
+        return 'FORMAT_ERROR' if ref($value) && ref($value) !~ 'Boolean';
 
-        return 'NOT_ALLOWED_VALUE' unless grep { $value eq $_ } @$allowed_values;
-        return;
+        for my $allowed_value (@$allowed_values) {
+            if ($value eq $allowed_value) {
+                $$output_ref = $allowed_value;
+                return;
+            }
+        }
+
+        return 'NOT_ALLOWED_VALUE';
     }
 }
 
@@ -97,6 +103,32 @@ sub like {
 
         return 'WRONG_FORMAT' unless $value =~  m/$re/;
         return;
+    };
+}
+
+
+sub string {
+    return sub {
+        my $value = shift;
+
+        return if !defined($value) || $value eq '';
+        return 'FORMAT_ERROR' if ref($value);
+        return;
+    };
+}
+
+
+sub equal {
+    my $allowed_value = shift;
+
+    return sub {
+        my ($value, undef, $output_ref) = @_;
+        return if !defined($value) || $value eq '';
+        return 'FORMAT_ERROR' if ref($value);
+
+        return if $value eq $allowed_value;
+
+        return 'NOT_ALLOWED_VALUE';
     };
 }
 

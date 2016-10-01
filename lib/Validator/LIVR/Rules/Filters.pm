@@ -3,7 +3,7 @@ package Validator::LIVR::Rules::Filters;
 use strict;
 use warnings;
 
-our $VERSION = '0.10';
+our $VERSION = '2.0';
 
 sub trim {
     return sub {
@@ -64,6 +64,20 @@ sub leave_only {
         $value =~ s/$re//g;
 
         $$output_ref = $value;
+        return;
+    };
+}
+
+sub default {
+    my $default_value = shift;
+
+    return sub {
+        my ( $value, undef, $output_ref ) = @_;
+
+        if ( !defined($value) || $value eq '' ) {
+            $$output_ref = $default_value;
+        }
+
         return;
     };
 }
