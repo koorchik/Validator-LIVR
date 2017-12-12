@@ -82,7 +82,7 @@ sub length_between {
         my $value = shift;
         return if !defined($value) || $value eq '';
         return 'FORMAT_ERROR' if ref($value);
-
+        print "AAAAA=" . length($value);
         return 'TOO_SHORT' if length($value) < $min_length;
         return 'TOO_LONG' if length($value) > $max_length;
         return;
