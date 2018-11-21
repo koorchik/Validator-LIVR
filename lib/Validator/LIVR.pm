@@ -5,6 +5,7 @@ use strict;
 use warnings FATAL => 'all';
 
 use Carp qw/croak/;
+use List::Util qw/uniq/;
 
 use Validator::LIVR::Rules::Common;
 use Validator::LIVR::Rules::String;
@@ -60,9 +61,10 @@ my %DEFAULT_RULES = (
 );
 
 my $IS_DEFAULT_AUTO_TRIM = 0;
+my $IS_DEFAULT_STRICT = 0;
 
 sub new {
-    my ($class, $livr_rules, $is_auto_trim) = @_;
+    my ($class, $livr_rules, $is_auto_trim, $is_strict) = @_;
 
     my $self = bless {
         is_prepared        => 0,
@@ -70,7 +72,8 @@ sub new {
         validators         => {},
         validator_builders => {},
         errors             => undef,
-        is_auto_trim       => ( $is_auto_trim // $IS_DEFAULT_AUTO_TRIM )
+        is_auto_trim       => ( $is_auto_trim // $IS_DEFAULT_AUTO_TRIM ),
+        is_strict          => ( $is_strict    // $IS_DEFAULT_STRICT )
     }, $class;
 
     $self->register_rules(%DEFAULT_RULES);
@@ -109,6 +112,11 @@ sub default_auto_trim {
     $IS_DEFAULT_AUTO_TRIM = !!$is_auto_trim;
 }
 
+sub default_strict {
+    my ($class, $is_strict) = @_;
+    $IS_DEFAULT_STRICT = !!$is_strict;
+}
+
 sub prepare {
     my $self = shift;
 
@@ -143,9 +151,14 @@ sub validate {
 
     my ( %errors, %result );
 
-    foreach my $field_name ( keys %{ $self->{validators} } ) {
+    foreach my $field_name ( uniq(keys %{ $self->{validators} }, keys %$data ) ) {
         my $validators = $self->{validators}{$field_name};
-        next unless $validators && @$validators;
+        unless ($validators && @$validators) {
+            if ($self->{is_strict}) {
+                $errors{$field_name} = "EXTRA_FIELD";
+            }
+            next;
+        }
 
         my $value = $data->{$field_name};
         my $is_ok = 1;
@@ -308,6 +321,7 @@ Validator::LIVR - Lightweight validator supporting Language Independent Validati
 
     # Common usage
     Validator::LIVR->default_auto_trim(1);
+    Validator::LIVR->default_strict(0);
 
     my $validator = Validator::LIVR->new({
         name      => 'required',
@@ -410,7 +424,7 @@ Features:
 
 =head1 CLASS METHODS
 
-=head2 Validator::LIVR->new( $LIVR [, $IS_AUTO_TRIM] )
+=head2 Validator::LIVR->new( $LIVR [, $IS_AUTO_TRIM, $IS_STRICT] )
 
 Contructor creates validator objects.
 
@@ -418,6 +432,9 @@ $LIVR - validations rules. Rules description is available here - L<https://githu
 
 $IS_AUTO_TRIM - asks validator to trim all values before validation. Output will be also trimmed.
 if $IS_AUTO_TRIM is undef than default_auto_trim value will be used.
+
+$IS_STRICT - validator will emit 'EXTRA_FIELD' error on fields that are not explicitly present in the rules.
+if $IS_STRICT is undef than default_strict value will be used.
 
 =head2 Validator::LIVR->register_aliased_default_rule( $ALIAS )
 

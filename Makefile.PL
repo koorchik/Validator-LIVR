@@ -23,6 +23,7 @@ WriteMakefile(
     },
     PREREQ_PM => {
         'Email::Valid'   => '0',
+        'List::Util'     => '0',
         'Regexp::Common' => '0'
     },
     ( $mm < 6.46
