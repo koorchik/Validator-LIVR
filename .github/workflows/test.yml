@@ -22,8 +22,11 @@ jobs:
         with:
           perl-version: ${{ matrix.perl }}
 
+      # The MakeMaker of Perl 5.10 does not write MYMETA files, where cpanm finds dependencies
       - name: Install dependencies
-        run: cpanm --notest --installdeps .
+        run: |
+          cpanm --notest ExtUtils::MakeMaker
+          cpanm --notest --installdeps .
 
       # disttest runs the tests in the distribution built from MANIFEST
       - name: Run tests
