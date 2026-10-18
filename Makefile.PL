@@ -12,12 +12,12 @@ WriteMakefile(
     ABSTRACT_FROM    => 'lib/Validator/LIVR.pm',
     LICENSE          => 'artistic_2',
     PL_FILES         => {},
-    MIN_PERL_VERSION => 5.010,
+    MIN_PERL_VERSION => 5.012,
     CONFIGURE_REQUIRES => {
         'ExtUtils::MakeMaker' => '0',
     },
     BUILD_REQUIRES => {
-        'Test::More'      => '0',
+        'Test::More'      => '0.96', # subtests without a plan
         'Test::Exception' => '0',
         'JSON'            => '0'
     },

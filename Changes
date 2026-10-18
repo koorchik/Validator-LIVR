@@ -54,4 +54,5 @@ v2.1
  - Faster: validation of a form is 3.5 times faster, "email" 14 times, "url" 5.7 times,
    building a validator and validating 2.6 times
  - The license in META is Artistic 2.0, it was "unknown"
- - Tests run on GitHub Actions with Perl from 5.10 to the newest one
+ - Requires Perl 5.12, as Email::Valid does since version 1.203
+ - Tests run on GitHub Actions with Perl from 5.12 to the newest one
