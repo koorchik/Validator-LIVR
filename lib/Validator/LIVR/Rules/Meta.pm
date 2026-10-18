@@ -190,8 +190,8 @@ sub livr_or { # we call it livr_or to avoid conflicts with the "or" operator
 
     return sub {
         my ($value, undef, $output_ref) = @_;
-        return if !defined($value) || $value eq '';
 
+        # Empty values go to the rule sets too, so "required" and "not_empty" in them work
         my $last_error;
 
         for my $validator (@validators) {

@@ -68,12 +68,10 @@ sub new {
         is_prepared        => 0,
         livr_rules         => $livr_rules,
         validators         => {},
-        validator_builders => {},
+        validator_builders => {%DEFAULT_RULES}, # checked by register_default_rules()
         errors             => undef,
         is_auto_trim       => ( $is_auto_trim // $IS_DEFAULT_AUTO_TRIM )
     }, $class;
-
-    $self->register_rules(%DEFAULT_RULES);
 
     return $self;
 }
@@ -113,6 +111,7 @@ sub prepare {
     my $self = shift;
 
     my $all_rules = $self->{livr_rules};
+    my $rule_builders = $self->get_rules();
 
     while ( my ($field, $field_rules) = each %$all_rules ) {
         $field_rules = [$field_rules] if ref($field_rules) ne 'ARRAY';
@@ -120,7 +119,7 @@ sub prepare {
         my @validators;
         foreach my $rule (@$field_rules) {
             my ($name, $args) = $self->_parse_rule($rule);
-            push @validators, $self->_build_validator($name, $args);
+            push @validators, $self->_build_validator($name, $args, $rule_builders);
         }
         $self->{validators}{$field} = \@validators;
     }
@@ -142,33 +141,34 @@ sub validate {
     $data = $self->_auto_trim($data) if $self->{is_auto_trim};
 
     my ( %errors, %result );
+    my $all_validators = $self->{validators};
 
-    foreach my $field_name ( keys %{ $self->{validators} } ) {
-        my $validators = $self->{validators}{$field_name};
+    foreach my $field_name ( keys %$all_validators ) {
+        my $validators = $all_validators->{$field_name};
         next unless $validators && @$validators;
 
         my $value = $data->{$field_name};
-        my $is_ok = 1;
+
+        # The output of the previous rules, the same as $result{$field_name}
+        my ( $has_output, $output );
 
         foreach my $v_cb (@$validators) {
-            my $field_result = $result{$field_name} // $value;
+            my $field_result = $output // $value;
 
-            my $err_code = $v_cb->(
-                exists $result{$field_name} ? $result{$field_name} : $value,
-                $data,
-                \$field_result
-            );
+            my $err_code = $v_cb->( $has_output ? $output : $value, $data, \$field_result );
 
             if ( $err_code ) {
                 $errors{$field_name} = $err_code;
-                $is_ok = 0;
+                $has_output = 0;
                 last;
             } elsif ( defined($field_result) ) {
-                $result{$field_name} = $field_result;
-            } elsif ( exists $data->{$field_name} && ! exists $result{$field_name}) {
-                $result{$field_name} = $field_result;
+                ( $has_output, $output ) = ( 1, $field_result );
+            } elsif ( !$has_output && exists $data->{$field_name} ) {
+                ( $has_output, $output ) = ( 1, undef );
             }
         }
+
+        $result{$field_name} = $output if $has_output;
     }
 
     if ( keys %errors ) {
@@ -232,10 +232,10 @@ sub _parse_rule {
 }
 
 sub _build_validator {
-    my ($self, $name, $args) = @_;
+    my ($self, $name, $args, $rule_builders) = @_;
     die "Rule [$name] not registered\n" unless $self->{validator_builders}->{$name};
 
-    return $self->{validator_builders}->{$name}->( @$args, $self->get_rules() );
+    return $self->{validator_builders}->{$name}->( @$args, $rule_builders // $self->get_rules() );
 }
 
 sub _build_aliased_rule {
