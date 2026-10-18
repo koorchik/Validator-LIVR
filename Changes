@@ -42,3 +42,16 @@ v2.0
  - Added modifier "default"
  - Add more edge cases to test suite
  - Add experimental status to the "like" rule
+
+v2.1
+ - Updated the test suite to the current LIVR test suite
+ - "or" passes empty values to its rule sets too, so "required" and "not_empty" in them work
+ - "email" rejects addresses with line breaks. Email::Valid accepted a trailing newline.
+ - "url" and "iso_date" reject a trailing newline
+ - "iso_date" checks dates without Time::Piece, which printed "Garbage at end of string" warnings
+ - "equal_to_field" does not warn when the other field is missing
+ - "length_between" does not print debug output anymore
+ - Faster: validation of a form is 3.5 times faster, "email" 14 times, "url" 5.7 times,
+   building a validator and validating 2.6 times
+ - The license in META is Artistic 2.0, it was "unknown"
+ - Tests run on GitHub Actions with Perl from 5.10 to the newest one

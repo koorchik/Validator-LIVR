@@ -1,4 +1,4 @@
-=for HTML <a href="https://travis-ci.org/koorchik/Validator-LIVR"><img src="https://travis-ci.org/koorchik/Validator-LIVR.svg?branch=master"></a>
+=for HTML <a href="https://github.com/koorchik/Validator-LIVR/actions/workflows/test.yml"><img src="https://github.com/koorchik/Validator-LIVR/actions/workflows/test.yml/badge.svg?branch=master"></a>
 
 =head1 NAME
 

@@ -10,7 +10,7 @@ WriteMakefile(
     AUTHOR           => q{Viktor Turskyi <koorchik@cpan.org>},
     VERSION_FROM     => 'lib/Validator/LIVR.pm',
     ABSTRACT_FROM    => 'lib/Validator/LIVR.pm',
-    LICENSE          => 'Artistic_2_0',
+    LICENSE          => 'artistic_2',
     PL_FILES         => {},
     MIN_PERL_VERSION => 5.010,
     CONFIGURE_REQUIRES => {

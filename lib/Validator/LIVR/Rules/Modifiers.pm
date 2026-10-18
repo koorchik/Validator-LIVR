@@ -3,7 +3,7 @@ package Validator::LIVR::Rules::Modifiers;
 use strict;
 use warnings;
 
-our $VERSION = '2.0';
+our $VERSION = '2.1';
 
 sub trim {
     return sub {

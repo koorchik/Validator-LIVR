@@ -1,0 +1,32 @@
+name: Tests
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The oldest supported version, some versions in between, and the newest one
+        perl: ['5.10', '5.16', '5.22', '5.28', '5.34', '5.40', '5.42', 'latest']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Perl ${{ matrix.perl }}
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: ${{ matrix.perl }}
+
+      - name: Install dependencies
+        run: cpanm --notest --installdeps .
+
+      # disttest runs the tests in the distribution built from MANIFEST
+      - name: Run tests
+        run: |
+          perl Makefile.PL
+          make disttest

@@ -13,7 +13,7 @@ use Validator::LIVR::Rules::Special;
 use Validator::LIVR::Rules::Meta;
 use Validator::LIVR::Rules::Modifiers;
 
-our $VERSION = '2.0';
+our $VERSION = '2.1';
 
 my %DEFAULT_RULES = (
     'required'         => \&Validator::LIVR::Rules::Common::required,
@@ -298,7 +298,7 @@ sub _auto_trim {
 
 1; # End of Validator::LIVR
 
-=for HTML <a href="https://travis-ci.org/koorchik/Validator-LIVR"><img src="https://travis-ci.org/koorchik/Validator-LIVR.svg?branch=master"></a>
+=for HTML <a href="https://github.com/koorchik/Validator-LIVR/actions/workflows/test.yml"><img src="https://github.com/koorchik/Validator-LIVR/actions/workflows/test.yml/badge.svg?branch=master"></a>
 
 =head1 NAME
 

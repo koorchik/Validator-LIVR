@@ -6,7 +6,7 @@ use warnings;
 use Email::Valid;
 use Regexp::Common qw/URI/;
 
-our $VERSION = '2.0';
+our $VERSION = '2.1';
 
 # Email::Valid is slow. Simple addresses, which it always accepts, are checked with
 # this regex first. The local part is up to 64 characters, the address up to 254.
