@@ -118,3 +118,17 @@ sub iso_date {
 }
 
 1;
+
+=head1 NAME
+
+Validator::LIVR::Rules::Special - Special rules of Validator::LIVR: email, url, iso_date and equal_to_field
+
+=head1 DESCRIPTION
+
+This module has the code of the special rules, which are documented in
+L<Validator::LIVR/Special rules>.
+
+Each sub is the builder of the rule with the same name. The code is a good
+example for L<writing your own rules|Validator::LIVR/WRITING RULES IN PERL>.
+
+=cut

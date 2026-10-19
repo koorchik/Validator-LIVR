@@ -113,3 +113,17 @@ sub number_between {
 }
 
 1;
+
+=head1 NAME
+
+Validator::LIVR::Rules::Numeric - Numeric rules of Validator::LIVR: integer, positive_integer, decimal, positive_decimal, min_number, max_number and number_between
+
+=head1 DESCRIPTION
+
+This module has the code of the numeric rules, which are documented in
+L<Validator::LIVR/Numeric rules>.
+
+Each sub is the builder of the rule with the same name. The code is a good
+example for L<writing your own rules|Validator::LIVR/WRITING RULES IN PERL>.
+
+=cut

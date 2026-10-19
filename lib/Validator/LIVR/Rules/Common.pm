@@ -36,3 +36,17 @@ sub any_object {
 }
 
 1;
+
+=head1 NAME
+
+Validator::LIVR::Rules::Common - Common rules of Validator::LIVR: required, not_empty, not_empty_list and any_object
+
+=head1 DESCRIPTION
+
+This module has the code of the common rules, which are documented in
+L<Validator::LIVR/Common rules>.
+
+Each sub is the builder of the rule with the same name. The code is a good
+example for L<writing your own rules|Validator::LIVR/WRITING RULES IN PERL>.
+
+=cut

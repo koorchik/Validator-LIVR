@@ -68,4 +68,6 @@ v2.1 2026-10-19
  - The license in META is Artistic 2.0, it was "unknown"
  - Tests run on GitHub Actions with Perl from 5.10 to the newest one
  - README.pod is not installed anymore. MakeMaker before 7.32 installed it as Validator/README.pod
+ - New documentation: a quick tour, all rules with their error codes, "prepare" and
+   how to write rules in Perl
  - Bugs are reported in GitHub Issues, and META links to them
