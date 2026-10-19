@@ -30,11 +30,20 @@ WriteMakefile(
         : ( META_MERGE => {
               resources => {
                   repository => 'https://github.com/koorchik/Validator-LIVR',
+                  bugtracker => 'https://github.com/koorchik/Validator-LIVR/issues',
               },
-              no_index => {directory => [qw/t/]},
             }
         )
     ),
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'Validator-LIVR-*' },
 );
+
+package MY;
+
+# MakeMaker before 7.32 installs a top-level README.pod as Validator/README.pod
+sub libscan {
+    my ( $self, $path ) = @_;
+    return '' if $path =~ /^README\.pod$/i;
+    return $self->SUPER::libscan($path);
+}

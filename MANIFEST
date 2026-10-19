@@ -1,5 +1,4 @@
 Changes
-ignore.txt
 lib/Validator/LIVR/Rules/Common.pm
 lib/Validator/LIVR/Rules/Meta.pm
 lib/Validator/LIVR/Rules/Modifiers.pm

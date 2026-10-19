@@ -43,7 +43,7 @@ v2.0
  - Add more edge cases to test suite
  - Add experimental status to the "like" rule
 
-v2.1
+v2.1 2026-10-19
  - Updated the test suite to the current LIVR test suite
  - "or" passes empty values to its rule sets too, so "required" and "not_empty" in them work
  - "email" rejects addresses with line breaks. Email::Valid accepted a trailing newline.
@@ -56,3 +56,5 @@ v2.1
  - The license in META is Artistic 2.0, it was "unknown"
  - Requires Perl 5.12, as Email::Valid does since version 1.203
  - Tests run on GitHub Actions with Perl from 5.12 to the newest one
+ - README.pod is not installed anymore. MakeMaker before 7.32 installed it as Validator/README.pod
+ - Bugs are reported in GitHub Issues, and META links to them
