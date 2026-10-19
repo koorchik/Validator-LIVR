@@ -66,7 +66,6 @@ v2.1 2026-10-19
  - Faster: validation of a form is 3.5 times faster, "email" 14 times, "url" 5.7 times,
    building a validator and validating 2.6 times
  - The license in META is Artistic 2.0, it was "unknown"
- - Requires Perl 5.12, as Email::Valid does since version 1.203
- - Tests run on GitHub Actions with Perl from 5.12 to the newest one
+ - Tests run on GitHub Actions with Perl from 5.10 to the newest one
  - README.pod is not installed anymore. MakeMaker before 7.32 installed it as Validator/README.pod
  - Bugs are reported in GitHub Issues, and META links to them

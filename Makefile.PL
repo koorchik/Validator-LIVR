@@ -12,7 +12,7 @@ WriteMakefile(
     ABSTRACT_FROM    => 'lib/Validator/LIVR.pm',
     LICENSE          => 'artistic_2',
     PL_FILES         => {},
-    MIN_PERL_VERSION => 5.012,
+    MIN_PERL_VERSION => 5.010,
     CONFIGURE_REQUIRES => {
         'ExtUtils::MakeMaker' => '0',
     },

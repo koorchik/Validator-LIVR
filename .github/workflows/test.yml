@@ -12,7 +12,7 @@ jobs:
       fail-fast: false
       matrix:
         # The oldest supported version, some versions in between, and the newest one
-        perl: ['5.12', '5.16', '5.22', '5.28', '5.34', '5.40', '5.42', 'latest']
+        perl: ['5.10', '5.16', '5.22', '5.28', '5.34', '5.40', '5.42', 'latest']
 
     steps:
       - uses: actions/checkout@v4
@@ -22,7 +22,7 @@ jobs:
         with:
           perl-version: ${{ matrix.perl }}
 
-      # The MakeMaker of Perl 5.12 does not write MYMETA files, where cpanm finds dependencies
+      # The MakeMaker of Perl 5.10 does not write MYMETA files, where cpanm finds dependencies
       - name: Install dependencies
         run: |
           cpanm --notest ExtUtils::MakeMaker
