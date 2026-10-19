@@ -644,7 +644,7 @@ Viktor Turskyi, C<< <koorchik at cpan.org> >>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2012 Viktor Turskyi.
+Copyright 2012-2026 Viktor Turskyi.
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of the Artistic License (2.0). You may obtain a
