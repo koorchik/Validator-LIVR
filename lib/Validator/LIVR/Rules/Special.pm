@@ -3,18 +3,30 @@ package Validator::LIVR::Rules::Special;
 use strict;
 use warnings;
 
-use Email::Valid;
-use Regexp::Common qw/URI/;
-
 our $VERSION = '2.1';
 
-# Email::Valid is slow. Simple addresses, which it always accepts, are checked with
-# this regex first. The local part is up to 64 characters, the address up to 254.
-my $SIMPLE_EMAIL_RE = qr/\A
-    [a-zA-Z0-9_+-]+ (?: \.[a-zA-Z0-9_+-]+ )*
+# From 0 to 255. Leading zeros are allowed, as Validator::LIVR 2.0 allowed them in URLs
+my $IPV4_OCTET = qr/25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9]/;
+
+# Letters, digits and hyphens, but not a hyphen at the start or the end. Up to 63 characters
+my $EMAIL_LABEL = qr/[a-zA-Z0-9] (?: [a-zA-Z0-9-]{0,61} [a-zA-Z0-9] )?/x;
+
+# The TLD starts with a letter, as the last label of a host name in "url"
+my $EMAIL_TLD = qr/[a-zA-Z] (?: [a-zA-Z0-9-]{0,61} [a-zA-Z0-9] )?/x;
+
+# As in the other LIVR implementations, the local part is dot-separated atoms or a quoted
+# string, and the domain is a host name or an IP address in brackets.
+# \z, not $: "$" also matches before a trailing newline
+my $EMAIL_RE = qr/\A
+    (?:
+        [^<>()\[\]\\.,;:\s\@"\x00-\x1f\x7f]+ (?: \.[^<>()\[\]\\.,;:\s\@"\x00-\x1f\x7f]+ )*
+      | " (?: [^"\\\@\x00-\x1f\x7f\x{2028}\x{2029}] | \\[^\x00-\x1f\x7f\x{2028}\x{2029}] )+ "
+    )
     \@
-    (?: [a-zA-Z0-9] (?: [a-zA-Z0-9-]* [a-zA-Z0-9] )? \. )+
-    [a-zA-Z0-9] (?: [a-zA-Z0-9-]* [a-zA-Z0-9] )?
+    (?:
+        \[ $IPV4_OCTET (?: \.$IPV4_OCTET ){3} \]
+      | (?: $EMAIL_LABEL \. )+ $EMAIL_TLD
+    )
 \z/x;
 
 sub email {
@@ -23,11 +35,9 @@ sub email {
         return if !defined($value) || $value eq '';
         return 'FORMAT_ERROR' if ref($value);
 
-        return if length($value) <= 254 && index($value, '@') <= 64 && $value =~ $SIMPLE_EMAIL_RE;
-
-        # Email::Valid accepts a trailing line break
-        return 'WRONG_EMAIL' if $value =~ /[\r\n\x{2028}\x{2029}]/;
-        return 'WRONG_EMAIL' unless Email::Valid->address($value);
+        # The local part is up to 64 characters, the address up to 254. "@" is not in the local part
+        return 'WRONG_EMAIL' if length($value) > 254 || index($value, '@') > 64;
+        return 'WRONG_EMAIL' unless $value =~ $EMAIL_RE;
         return;
     };
 }
@@ -47,9 +57,26 @@ sub equal_to_field {
 }
 
 
-# Every access to %RE makes a new regex object, so it is done once.
-# \z, not $: "$" also matches before a trailing newline
-my $URL_RE = qr/^$RE{URI}{HTTP}{-scheme => 'https?'}\z/;
+# Letters of any language, digits and hyphens, but not a hyphen at the start or the end
+my $URL_LABEL = qr/[a-z0-9\x{a1}-\x{10ffff}]+ (?: -+[a-z0-9\x{a1}-\x{10ffff}]+ )*/xi;
+
+# The last label starts with a letter, so a host name is never an IP address
+my $URL_LAST_LABEL = qr/[a-z\x{a1}-\x{10ffff}] [a-z0-9\x{a1}-\x{10ffff}]* (?: -+[a-z0-9\x{a1}-\x{10ffff}]+ )*/xi;
+
+# An http or https URL with a host name or an IPv4 address, and an optional user, port,
+# path, query and fragment. As in Validator::LIVR 2.0, and unlike the other LIVR
+# implementations, a host name can be without a TLD, such as "intranet", any IPv4
+# address and a port of up to 5 digits are allowed, and the length is not limited
+my $URL_RE = qr/\A
+    https?:\/\/
+    (?: \S+\@ )?
+    (?:
+        $IPV4_OCTET (?: \.$IPV4_OCTET ){3}
+      | (?: $URL_LABEL \. )* $URL_LAST_LABEL
+    ) \.?
+    (?: :[0-9]{0,5} )?
+    (?: [\/?\#] \S* )?
+\z/xi;
 
 sub url {
     return sub {
@@ -57,9 +84,7 @@ sub url {
         return if !defined($value) || $value eq '';
         return 'FORMAT_ERROR' if ref($value);
 
-        $value =~ s/#[^#]*$//;
-
-        return 'WRONG_URL' unless lc($value) =~ $URL_RE;
+        return 'WRONG_URL' unless $value =~ $URL_RE;
         return;
     };
 }

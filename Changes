@@ -50,8 +50,16 @@ v2.1 2026-10-19
  - A validator that died on a wrong rule dies again on the next validate(). Before,
    the next validate() checked no fields and passed any data.
  - "or" passes empty values to its rule sets too, so "required" and "not_empty" in them work
- - "email" rejects addresses with line breaks. Email::Valid accepted a trailing newline.
- - "url" and "iso_date" reject a trailing newline
+ - No dependencies: "email" and "url" are checked as in the other LIVR implementations,
+   without Email::Valid and Regexp::Common. The module loads in 9 ms instead of 21.
+ - "email" rejects names and comments, such as "John <john@example.com>", spaces around
+   the address, line breaks, and TLDs that start with a digit, as in an IP address without
+   brackets. It accepts letters of other languages in the local part.
+ - "url" accepts a user and password, a query without a path, any characters in the path
+   and domain names in other languages. It rejects IP addresses with numbers over 255 and
+   a trailing newline.
+ - "url" checks a long wrong URL fast. A path of 100 KB took more than 20 seconds.
+ - "iso_date" rejects a trailing newline
  - "iso_date" checks dates without Time::Piece, which printed "Garbage at end of string" warnings
  - "equal_to_field" does not warn when the other field is missing
  - "length_between" does not print debug output anymore

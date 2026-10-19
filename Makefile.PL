@@ -22,8 +22,9 @@ WriteMakefile(
         'JSON'            => '0'
     },
     PREREQ_PM => {
-        'Email::Valid'   => '0',
-        'Regexp::Common' => '0'
+        # Core modules, but some systems install them separately
+        'Carp'         => '0',
+        'Scalar::Util' => '0',
     },
     ( $mm < 6.46
         ? ()

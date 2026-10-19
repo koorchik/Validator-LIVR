@@ -106,8 +106,8 @@ subtest 'Rules edge cases out of the test suite' => sub {
     );
 };
 
-# Simple emails are checked without Email::Valid, so these are the limits of that check
-subtest 'Emails near the limits of simple emails' => sub {
+# The local part is up to 64 characters, a domain label up to 63 and the address up to 254
+subtest 'Emails near the length limits' => sub {
     my $validator = Validator::LIVR->new({ email => 'email' });
     my $long_domain = join( '', ( 'b' x 63 . '.' ) x 3 );
 
