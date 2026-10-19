@@ -15,6 +15,7 @@ t/03-auto_trim.t
 t/04-custom_filters.t
 t/05-rules_replacement.t
 t/06-custom_aliases.t
+t/07-wrong_rules.t
 t/test_suite/aliases_negative/01-adult_age/aliases.json
 t/test_suite/aliases_negative/01-adult_age/errors.json
 t/test_suite/aliases_negative/01-adult_age/input.json

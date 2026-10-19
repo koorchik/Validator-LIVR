@@ -113,7 +113,10 @@ sub prepare {
     my $all_rules = $self->{livr_rules};
     my $rule_builders = $self->get_rules();
 
-    while ( my ($field, $field_rules) = each %$all_rules ) {
+    # Not "each": when a rule dies, it leaves the iterator in the middle of the hash,
+    # and the next prepare() would skip the fields up to that rule
+    foreach my $field ( keys %$all_rules ) {
+        my $field_rules = $all_rules->{$field};
         $field_rules = [$field_rules] if ref($field_rules) ne 'ARRAY';
 
         my @validators;
@@ -219,8 +222,11 @@ sub _parse_rule {
     my ($name, $args);
 
     if ( ref($livr_rule) eq 'HASH' ) {
-        ($name) = keys %$livr_rule;
+        # Only the first key would be used, and the order of keys is random
+        my @names = sort keys %$livr_rule;
+        die 'Rule [' . join( ', ', @names ) . "] should have one name\n" if @names != 1;
 
+        $name = $names[0];
         $args = $livr_rule->{$name};
         $args = [$args] unless ref($args) eq 'ARRAY';
     } else {
