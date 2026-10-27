@@ -94,6 +94,7 @@ sub like {
     my ($re, $flags) = @_;
 
     my $is_ignore_case = @_ == 3 && index( $flags, 'i') >= 0;
+    $re = _dollar_end_only($re);
     $re = $is_ignore_case ? qr/$re/i : qr/$re/;
 
     return sub {
@@ -104,6 +105,23 @@ sub like {
         return 'WRONG_FORMAT' unless $value =~  m/$re/;
         return;
     };
+}
+
+
+# LIVR patterns follow JavaScript, where "$" matches only at the end of the value.
+# In Perl it also matches before a trailing newline, so "12345\n" would match
+# "^[0-9]{5}$". Replaces "$" outside character classes with "\z".
+sub _dollar_end_only {
+    my $re = shift;
+
+    $re =~ s{
+        ( \\.                                               # an escaped character
+        | \[ \^? \]? (?: \[:[^\]]*:\] | \\. | [^\]] )* \]   # a character class
+        )
+        | \$
+    }{ defined $1 ? $1 : '\z' }gesx;
+
+    return $re;
 }
 
 
