@@ -7,7 +7,7 @@ use Test::More;
 
 use Validator::LIVR;
 
-# "$" matches only at the end of the value, as in JavaScript
+# "$" matches only at the end of the value
 sub check_like {
     my ( $rule, %values ) = @_;
     my $validator = Validator::LIVR->new({ field => { like => $rule } });

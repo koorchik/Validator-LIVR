@@ -108,9 +108,10 @@ sub like {
 }
 
 
-# LIVR patterns follow JavaScript, where "$" matches only at the end of the value.
-# In Perl it also matches before a trailing newline, so "12345\n" would match
-# "^[0-9]{5}$". Replaces "$" outside character classes with "\z".
+# In LIVR "$" at the end of a pattern matches only at the end of the value, the
+# way RFC 9485 (I-Regexp) maps a pattern to Perl ("\z"). In Perl it also matches
+# before a trailing newline, so "12345\n" would match "^[0-9]{5}$". Replaces "$"
+# outside character classes with "\z".
 sub _dollar_end_only {
     my $re = shift;
 
