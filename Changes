@@ -71,3 +71,7 @@ v2.1 2026-10-19
  - New documentation: a quick tour, all rules with their error codes, "prepare" and
    how to write rules in Perl
  - Bugs are reported in GitHub Issues, and META links to them
+
+v2.2
+ - "like": "$" matches only at the end of the value, as the LIVR specification
+   requires. "^[0-9]{5}$" accepted "12345\n" with a trailing newline.
