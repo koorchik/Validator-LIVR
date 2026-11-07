@@ -3,7 +3,7 @@ package Validator::LIVR::Rules::Special;
 use strict;
 use warnings;
 
-our $VERSION = '2.2';
+our $VERSION = '2.21';
 
 # From 0 to 255. Leading zeros are allowed, as Validator::LIVR 2.0 allowed them in URLs
 my $IPV4_OCTET = qr/25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9]/;

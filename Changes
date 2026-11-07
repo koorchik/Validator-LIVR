@@ -99,3 +99,7 @@ v2.2 2026-11-07
    suite in t/test_suite_2.5. Tests need Test::MockTime
  - Faster: building a validator does not copy the table of rules, "list_of", "or" and aliases
    validate values without a validator call
+
+v2.21 2026-11-07
+ - Docs: LIVR 2.5 is released, not a draft. Validator::LIVR implements LIVR 2.0 and
+   LIVR 2.5, the documentation links the LIVR 2.5 specification and the rules on the site

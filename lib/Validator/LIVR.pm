@@ -13,7 +13,7 @@ use Validator::LIVR::Rules::Special;
 use Validator::LIVR::Rules::Meta;
 use Validator::LIVR::Rules::Modifiers;
 
-our $VERSION = '2.2';
+our $VERSION = '2.21';
 
 # Rule builders of new validators. The hash is never changed in place: register_default_rules()
 # makes a new one. So new() does not copy it, and a validator keeps the rules of the time it
@@ -472,9 +472,10 @@ L<a dozen languages|https://livr-spec.org/introduction/implementations.html>,
 one rule set can check a form in the browser with JavaScript and again on the
 server with Perl.
 
-This module implements L<LIVR 2.0|https://livr-spec.org> and passes the
-test suite of the specification. It also has the rules of the LIVR 2.5 draft,
-see L</LIVR 2.5 rules>, and passes its test suite.
+This module implements L<LIVR 2.0|https://livr-spec.org> and
+L<LIVR 2.5|https://github.com/koorchik/LIVR/blob/master/drafts/v2.5.md>, and
+passes the test suites of both. The rules added in LIVR 2.5 are in
+L</LIVR 2.5 rules>.
 
 =over 4
 
@@ -876,9 +877,10 @@ Sets C<$value> when the field is missing or empty.
 
 =head2 LIVR 2.5 rules
 
-L<Draft specification|https://github.com/koorchik/LIVR/blob/master/drafts/v2.5.md>
+L<LIVR 2.5 specification|https://github.com/koorchik/LIVR/blob/master/drafts/v2.5.md>,
+L<all rules on the site|https://livr-spec.org/validation-rules.html>
 
-The rules of the LIVR 2.5 draft. They are loaded on first use, so they do not
+The rules added in LIVR 2.5. They are loaded on first use, so they do not
 slow down C<use Validator::LIVR>. They check their arguments when the validator
 is built: L</prepare> dies on a wrong argument, such as C<< { boolean => 1 } >>
 or C<< { digest => 'MD5' } >>, or on C<undef> or an empty list in place of
