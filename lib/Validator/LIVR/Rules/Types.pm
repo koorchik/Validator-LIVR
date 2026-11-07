@@ -44,9 +44,10 @@ sub boolean {
         }
 
         # A number 1.0 is "1", but the string "1.0" is not a boolean
-        if ( $value eq '1' || $value eq 'true' ) {
+        my $string = string_form($value);
+        if ( $string eq '1' || $string eq 'true' ) {
             $$output_ref = $TRUE;
-        } elsif ( $value eq '0' || $value eq 'false' ) {
+        } elsif ( $string eq '0' || $string eq 'false' ) {
             $$output_ref = $FALSE;
         } else {
             return 'NOT_BOOLEAN';
@@ -126,7 +127,8 @@ sub max_decimals {
         my $number = $value + 0;
         return 'NOT_NUMBER' if $number - $number != 0;
 
-        $$output_ref = $number;
+        # A number stays as it is: -0 + 0 is 0
+        $$output_ref = $is_number ? $value : $number;
         return;
     };
 }
@@ -271,12 +273,21 @@ sub primitive_string {
 # Perl before 5.36 cannot tell a number from a string once it is used as a string, so there
 # numbers keep the string form of Perl
 sub string_form {
-    return HAS_CREATED_AS_NUMBER && builtin::created_as_number( $_[0] ) ? number_string( $_[0] ) : "$_[0]";
+    return number_string( $_[0] ) if HAS_CREATED_AS_NUMBER && builtin::created_as_number( $_[0] );
+
+    # The number -0 is "0". Perl writes it as "-0", and JSON::PP 4 decodes -0 as it on Perl 5.10.
+    # A string "-0" has no number flags, unless it was used as a number
+    my $string = "$_[0]";
+    return $string if HAS_CREATED_AS_NUMBER || $string ne '-0';
+
+    require B;
+    return B::svref_2object( \$_[0] )->FLAGS & ( B::SVp_IOK() | B::SVp_NOK() ) ? '0' : $string;
 }
 
 sub number_string {
     my $number = shift;
     my $string = "$number";
+    return '0' if $string eq '-0';
 
     # Perl writes 15 digits, and an exponent from 1e15 on. Integers below that are exact
     return $string if $string !~ /[.eEnN]/;

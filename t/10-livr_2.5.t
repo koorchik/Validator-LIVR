@@ -303,6 +303,27 @@ subtest 'A reference of "when" is a string, not a number' => sub {
         'A string with digits is a field name';
 };
 
+subtest 'The number -0 has the string form "0"' => sub {
+    require JSON::PP;
+
+    # Perl 5.10 writes it as "-0", as JSON::PP 4 decodes -0.0 there
+    my $minus_zero = -( 1e-200 * 1e-200 );
+
+    my $validator = Validator::LIVR->new({
+        flag     => 'boolean',
+        hex      => 'hex',
+        prefix   => { starts_with => '0' },
+        amount   => { max_decimals => 0 },
+        string   => 'boolean',
+    });
+
+    my $output = $validator->validate({ map { $_ => $minus_zero } qw/flag hex prefix amount/ });
+    ok( $output, 'passes' ) or diag explain $validator->get_errors();
+    is_deeply( $output, { flag => JSON::PP::false(), hex => '0', prefix => '0', amount => $minus_zero }, 'with the string form "0"' );
+
+    ok( !$validator->validate({ string => '-0' }), 'The string "-0" is not a boolean' );
+};
+
 subtest 'null and lists in place of rules of "values", "keys" and "when" die with a clear message' => sub {
     my @cases = (
         [ { values => undef },                                       'Rule [values] got null in place of rules, use "any" for no rules' ],

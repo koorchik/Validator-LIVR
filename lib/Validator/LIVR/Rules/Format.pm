@@ -7,9 +7,6 @@ use Validator::LIVR::Rules::Types;
 
 our $VERSION = '2.2';
 
-BEGIN { warnings->unimport('experimental::builtin') if $] >= 5.036 }
-use constant HAS_CREATED_AS_NUMBER => Validator::LIVR::Rules::Types::HAS_CREATED_AS_NUMBER;
-
 # LIVR 2.5: formats and checksums. They check the string form of a string or a number and
 # output it. A boolean gets the error code of the rule (true is not a hostname, "true" is), a
 # hash or a list gets FORMAT_ERROR. The builder of "hex" is livr_hex, as Perl has hex().
@@ -31,8 +28,7 @@ sub _regex_rule {
             return ref($value) =~ /Boolean/ ? $error_code : 'FORMAT_ERROR';
         }
 
-        my $string = HAS_CREATED_AS_NUMBER && builtin::created_as_number($value)
-            ? Validator::LIVR::Rules::Types::number_string($value) : "$value";
+        my $string = Validator::LIVR::Rules::Types::string_form($value);
         return $error_code unless $string =~ $re;
 
         $$output_ref = $string;
@@ -52,8 +48,7 @@ sub _check_rule {
             return ref($value) =~ /Boolean/ ? $error_code : 'FORMAT_ERROR';
         }
 
-        my $string = HAS_CREATED_AS_NUMBER && builtin::created_as_number($value)
-            ? Validator::LIVR::Rules::Types::number_string($value) : "$value";
+        my $string = Validator::LIVR::Rules::Types::string_form($value);
         return $error_code unless $is_valid->($string);
 
         $$output_ref = $string;
