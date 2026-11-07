@@ -5,7 +5,7 @@ use warnings;
 
 use Validator::LIVR::Rules::Types;
 
-our $VERSION = '2.1';
+our $VERSION = '2.2';
 
 BEGIN { warnings->unimport('experimental::builtin') if $] >= 5.036 }
 use constant HAS_CREATED_AS_NUMBER => Validator::LIVR::Rules::Types::HAS_CREATED_AS_NUMBER;

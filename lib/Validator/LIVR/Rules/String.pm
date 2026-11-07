@@ -3,7 +3,7 @@ package Validator::LIVR::Rules::String;
 use strict;
 use warnings;
 
-our $VERSION = '2.1';
+our $VERSION = '2.2';
 
 sub one_of {
     my $allowed_values;
