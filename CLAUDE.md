@@ -30,7 +30,7 @@ make dist                        # the release tarball
 ## Compatibility
 
 - `t/test_suite/` and `t/test_suite_2.5/` are the shared test suites from https://github.com/koorchik/LIVR. Update them by copying from there; the behavior must match them. `options.json` of a case gives the time that `t/01-livr_test_suite.t` fixes with Test::MockTime, `schema_errors/` cases pass when `prepare()` dies.
-- `email` and `url` (`Rules/Special.pm`) use their own regular expressions. `url` checks hosts, IPv4 addresses and ports as Validator::LIVR 2.0 did (`http://intranet/` is valid), not as the JavaScript implementation does. `email` follows the JavaScript structure with the RFC length limits. `t/08-email_and_url.t` pins the edge cases.
+- `email` and `url` (`Rules/Special.pm`) use their own regular expressions. `url` checks hosts and IPv4 addresses as Validator::LIVR 2.0 did (`http://intranet/` is valid), not as the JavaScript implementation does, plus the three points of LIVR 2.5: no dot after the host, labels of up to 63 characters, ports of 1-5 digits from 0 to 65535. `email` follows the JavaScript structure with the RFC length limits. `t/08-email_and_url.t` pins the edge cases.
 - Inputs have no length limit, so regular expressions must stay linear: no nested quantifiers such as `(?:[a-z]-*)*[a-z]+`. Regexp::Common, used in 2.0, took more than 20 seconds for a wrong 100 KB URL. Use `\z`, not `$`, which also matches before a trailing newline.
 
 ## Constraints
